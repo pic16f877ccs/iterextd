@@ -2,6 +2,14 @@
 name = "iterextd"
 version = "0.1.0"
 edition = "2021"
+authors = ["Karl Wulfert <pic16f877.ccs@emailn.de>"]
+readme = "README.md"
+repository = "https://github.com/pic16f877ccs/iterextd"
+homepage = "https://github.com/pic16f877ccs/iterextd"
+license = "MIT"
+keywords = ["Iterator", "Adapter", "Collect"]
+categories = ["algorithms", "rust-patterns", "data-structures"]
+description = "This trait provides additional methods for working with iterators, enhancing their functionality."
 
 [dependencies]
 
