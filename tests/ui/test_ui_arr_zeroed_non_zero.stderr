@@ -1,0 +1,22 @@
+error[E0277]: the trait bound `&u8: iterextd::iterator::AllowZero` is not satisfied
+ --> tests/ui/test_ui_arr_zeroed_non_zero.rs:6:43
+  |
+6 |     let arr_coll: (usize, [_; 10]) = iter.collect_arr_zeroed();
+  |                                           ^^^^^^^^^^^^^^^^^^ the trait `iterextd::iterator::AllowZero` is not implemented for `&u8`
+  |
+  = help: the trait `iterextd::iterator::AllowZero` is implemented for `u8`
+note: the method call chain might not have had the expected associated types
+ --> tests/ui/test_ui_arr_zeroed_non_zero.rs:5:20
+  |
+4 |     let arr = [10u8, 20u8, 40u8, 50u8];
+  |               ------------------------ this expression has type `[u8; 4]`
+5 |     let iter = arr.iter();
+  |                    ^^^^^^ `Iterator::Item` is `&u8` here
+note: required by a bound in `collect_arr_zeroed`
+ --> src/iterator.rs
+  |
+  |     fn collect_arr_zeroed<const N: usize>(self) -> (usize, [Self::Item; N])
+  |        ------------------ required by a bound in this associated function
+...
+  |         Self::Item: AllowZero,
+  |                     ^^^^^^^^^ required by this bound in `IterExtd::collect_arr_zeroed`

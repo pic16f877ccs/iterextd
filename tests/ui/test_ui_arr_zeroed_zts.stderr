@@ -1,0 +1,16 @@
+error[E0277]: the trait bound `&[u8]: iterextd::iterator::AllowZero` is not satisfied
+ --> tests/ui/test_ui_arr_zeroed_zts.rs:7:35
+  |
+7 |     let _: (usize, [_; 2]) = iter.collect_arr_zeroed();
+  |                                   ^^^^^^^^^^^^^^^^^^ the trait `iterextd::iterator::AllowZero` is not implemented for `&[u8]`
+  |
+  = help: the trait `iterextd::iterator::AllowZero` is implemented for `[T; N]`
+  = note: required for `[&[u8]; 2]` to implement `iterextd::iterator::AllowZero`
+note: required by a bound in `collect_arr_zeroed`
+ --> src/iterator.rs
+  |
+  |     fn collect_arr_zeroed<const N: usize>(self) -> (usize, [Self::Item; N])
+  |        ------------------ required by a bound in this associated function
+...
+  |         Self::Item: AllowZero,
+  |                     ^^^^^^^^^ required by this bound in `IterExtd::collect_arr_zeroed`
