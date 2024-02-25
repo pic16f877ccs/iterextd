@@ -45,6 +45,7 @@ mod iterator;
 mod structs;
 
 pub use crate::iterator::IterExtd;
+pub use crate::iterator::TupleIter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
@@ -57,8 +58,12 @@ pub use crate::structs::Previous;
 pub use crate::structs::SkipStepBy;
 pub use crate::structs::SliceCopied;
 pub use crate::structs::StepByFn;
+pub use crate::structs::TupleImut;
+pub use crate::structs::TupleMut;
 
 use core::fmt;
 use core::iter::{Fuse, FusedIterator};
 use core::mem::MaybeUninit;
 use core::ptr;
+use core::marker::PhantomData;
+use core::ops::Range;

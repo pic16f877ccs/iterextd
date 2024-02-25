@@ -2,6 +2,8 @@ use crate::fmt;
 use crate::ptr;
 use crate::MaybeUninit;
 use crate::{Fuse, FusedIterator};
+use crate::PhantomData;
+use crate::Range;
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -538,4 +540,18 @@ where
         ptr::copy(slice.as_ptr(), arr.as_mut_ptr() as *mut T, N);
         arr.assume_init()
     }
+}
+
+/// Immutable tuple iterator.
+#[derive(Debug, Clone)]
+pub struct TupleImut<'a, T, const N: usize> {
+    pub(crate) arr: [&'a T; N],
+    pub(crate) idx_iter: Range<usize>,
+}
+/// Mutable tuple iterator.
+#[derive(Debug, Clone)]
+pub struct TupleMut<'a, T: 'a, const N: usize> {
+    pub(crate) arr: [*mut T; N],
+    pub(crate) idx_iter: Range<usize>,
+    pub(crate) _unused: PhantomData<&'a mut T>,
 }
