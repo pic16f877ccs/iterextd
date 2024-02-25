@@ -167,11 +167,11 @@ pub trait IterExtd: Iterator {
     /// assert_eq!(arr, [210, 211, 212, 213]);
     ///
     /// ```
-    fn consume(mut self)
+    fn consume(self)
     where
         Self: Sized,
     {
-        while let Some(_) = self.next() { }
+        for _ in self {}
     }
 
     /// Combine two iterators in parts sequentially.

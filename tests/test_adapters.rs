@@ -794,8 +794,8 @@ fn test_map_by_two() {
     let vec_right = iter_cloned.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
 
-    let vec = vec!["one", "two", "three"];
-    let iter = vec.iter().map_by_two(|a, b| (b, a));
+    //let vec = vec!["one", "two", "three"];
+    //let iter = vec.iter().map_by_two(|a, b| (b, a));
     //assert_eq!(
     //    format!("{:?}", iter),
     //    "MapByTwo { iter: Iter([\"one\", \"two\", \"three\"]), f: \"Closure\" }".to_string()
@@ -842,8 +842,8 @@ fn test_map_by_three() {
     let vec_right = iter_cloned.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
 
-    let vec = vec!["one", "two", "three"];
-    let iter = vec.iter().map_by_three(|a, b, c| (c, b, a));
+    //let vec = vec!["one", "two", "three"];
+    //let iter = vec.iter().map_by_three(|a, b, c| (c, b, a));
     //assert_eq!(
     //    format!("{:?}", iter),
     //    "MapByThree { iter: Iter([\"one\", \"two\", \"three\"]), f: \"Closure\" }".to_string()
