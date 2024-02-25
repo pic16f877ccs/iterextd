@@ -849,3 +849,10 @@ fn test_map_by_three() {
     //    "MapByThree { iter: Iter([\"one\", \"two\", \"three\"]), f: \"Closure\" }".to_string()
     //);
 }
+
+#[test]
+fn test_consume() {
+     let mut arr = [1, 2, 3];
+     let _ = arr.iter_mut().map(|elem| { *elem *=10;}).consume();
+     assert_eq!(arr, [10, 20, 30]);
+}

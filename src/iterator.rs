@@ -153,6 +153,27 @@ pub trait IterExtd: Iterator {
         self.arr_chunks::<N>().next().unwrap()
     }
 
+    /// Consumes an iterator, returns nothing.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let mut arr = [200, 201, 202, 203];
+    /// let _ = arr.iter_mut().map(|elem| { *elem +=10;}).consume();
+    /// assert_eq!(arr, [210, 211, 212, 213]);
+    ///
+    /// ```
+    fn consume(mut self)
+    where
+        Self: Sized,
+    {
+        while let Some(_) = self.next() { }
+    }
+
     /// Combine two iterators in parts sequentially.
     /// The length of the piece can be set for each separately.
     ///
