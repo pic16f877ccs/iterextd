@@ -114,7 +114,6 @@ pub trait IterExtd: Iterator {
     where
         Self: Sized + Iterator,
         Self::Item: AllowZero,
-        //[Self::Item]: AllowZero,
     {
         assert!(N != 0, "array size must be non-zero");
         let mut index = 0;

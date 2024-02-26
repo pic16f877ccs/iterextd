@@ -1,9 +1,9 @@
 use crate::fmt;
 use crate::ptr;
 use crate::MaybeUninit;
-use crate::{Fuse, FusedIterator};
 use crate::PhantomData;
 use crate::Range;
+use crate::{Fuse, FusedIterator};
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -190,7 +190,6 @@ where
         fmt.debug_struct("MapByThree")
             .field("iter", &self.iter)
             .field("f", &format!("{:p}", &self.f))
-            //.field("f", &"Closure")
             .finish()
     }
 }
@@ -237,7 +236,6 @@ where
         fmt.debug_struct("MapByTwo")
             .field("iter", &self.iter)
             .field("f", &format!("{:p}", &self.f))
-            //.field("f", &"Closure")
             .finish()
     }
 }
@@ -284,7 +282,6 @@ where
             .field("iter_self", &self.iter_self)
             .field("iter_other", &self.iter_other)
             .field("f", &format!("{:p}", &self.f))
-            //.field("f", &"Closure")
             .finish()
     }
 }
@@ -548,6 +545,7 @@ pub struct TupleImut<'a, T, const N: usize> {
     pub(crate) arr: [&'a T; N],
     pub(crate) idx_iter: Range<usize>,
 }
+
 /// Mutable tuple iterator.
 #[derive(Debug, Clone)]
 pub struct TupleMut<'a, T: 'a, const N: usize> {

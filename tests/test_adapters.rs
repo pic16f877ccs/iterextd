@@ -734,10 +734,6 @@ fn test_map_iter() {
     let a_iter = a_arr.iter();
     let b_iter = b_arr.iter();
     let iter = a_iter.map_iters(b_iter, |a, b| Some([a.next()?, b.next()?]));
-    //assert_eq!(
-    //    format!("{:?}", iter.clone()),
-    //    "MapIters { iter_self: Iter([10, 20, 30, 40, 50]), iter_other: Iter([1, 2, 3]), f: \"Closure\" }".to_string()
-    //);
 
     let vec = iter.collect::<Vec<[&i32; 2]>>();
     assert_eq!(
@@ -793,13 +789,6 @@ fn test_map_by_two() {
     let vec_left = iter.collect::<Vec<_>>();
     let vec_right = iter_cloned.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
-
-    //let vec = vec!["one", "two", "three"];
-    //let iter = vec.iter().map_by_two(|a, b| (b, a));
-    //assert_eq!(
-    //    format!("{:?}", iter),
-    //    "MapByTwo { iter: Iter([\"one\", \"two\", \"three\"]), f: \"Closure\" }".to_string()
-    //);
 }
 
 #[test]
@@ -841,18 +830,16 @@ fn test_map_by_three() {
     let vec_left = iter.collect::<Vec<_>>();
     let vec_right = iter_cloned.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
-
-    //let vec = vec!["one", "two", "three"];
-    //let iter = vec.iter().map_by_three(|a, b, c| (c, b, a));
-    //assert_eq!(
-    //    format!("{:?}", iter),
-    //    "MapByThree { iter: Iter([\"one\", \"two\", \"three\"]), f: \"Closure\" }".to_string()
-    //);
 }
 
 #[test]
 fn test_consume() {
-     let mut arr = [1, 2, 3];
-     let _ = arr.iter_mut().map(|elem| { *elem *=10;}).consume();
-     assert_eq!(arr, [10, 20, 30]);
+    let mut arr = [1, 2, 3];
+    let _ = arr
+        .iter_mut()
+        .map(|elem| {
+            *elem *= 10;
+        })
+        .consume();
+    assert_eq!(arr, [10, 20, 30]);
 }

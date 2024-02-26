@@ -63,7 +63,7 @@ pub use crate::structs::TupleMut;
 
 use core::fmt;
 use core::iter::{Fuse, FusedIterator};
-use core::mem::MaybeUninit;
-use core::ptr;
 use core::marker::PhantomData;
+use core::mem::MaybeUninit;
 use core::ops::Range;
+use core::ptr;
