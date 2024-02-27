@@ -61,6 +61,9 @@ pub use crate::structs::StepByFn;
 pub use crate::structs::TupleImut;
 pub use crate::structs::TupleMut;
 
+#[cfg(feature = "itern")]
+pub use crate::iterator::trait_itern::TupleItern;
+
 use core::fmt;
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;

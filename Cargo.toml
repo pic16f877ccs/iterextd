@@ -13,5 +13,8 @@ description = "This trait provides additional methods for working with iterators
 
 [dependencies]
 
+[features]
+itern = []
+
 [dev-dependencies]
 trybuild = "1.0.83"

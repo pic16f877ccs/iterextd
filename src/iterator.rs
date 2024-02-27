@@ -605,3 +605,104 @@ impl_tuple_iter!(9; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T);
 impl_tuple_iter!(10; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T);
 impl_tuple_iter!(11; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
 impl_tuple_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
+
+#[cfg(feature = "itern")]
+pub mod trait_itern {
+    use crate::structs::{TupleImut, TupleMut};
+    use crate::PhantomData;
+
+    /// A trait that allows iteration over N elements of a tuple.
+    ///
+    pub trait TupleItern<'a> {
+        /// The type of immutable references yielded by the tuple iterator.
+        type A;
+        /// The type of mutable references yielded by the tuple iterator.
+        type B;
+
+        /// A tuple iterator that allows you to get each value by reference.
+        ///
+        /// The difference from the [tuple_iter](crate::TupleIter::tuple_iter) method is that it can get N elements.
+        ///
+        /// # Panics
+        /// If N is greater than the number of elements in the tuple, panic.
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
+        /// use iterextd::TupleItern;
+        ///
+        /// let tup = (5, 4, 3, 2, 1);
+        /// let mut tup_iter = tup.tuple_itern::<3>().rev();
+        /// assert_eq!(tup_iter.next(), Some(&3));
+        /// assert_eq!(tup_iter.next(), Some(&4));
+        /// assert_eq!(tup_iter.next(), Some(&5));
+        /// assert_eq!(tup_iter.next(), None);
+        /// ```
+        fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'a, Self::A, N>;
+
+        /// A tuple iterator that allows you to get each value by mutable reference.
+        ///
+        /// The difference from the [tuple_iter_mut](crate::TupleIter::tuple_iter_mut) method is that it can get N elements.
+        ///
+        /// # Panics
+        /// If N is greater than the number of elements in the tuple, panic.
+        ///
+        /// # Examples
+        ///
+        /// Basic usage:
+        ///
+        /// ```
+        /// use iterextd::TupleItern;
+        ///
+        /// let mut tup = (vec![20], vec![21], vec![22], vec![23]);
+        /// let _ = tup.tuple_itern_mut::<2>().for_each(|elem| { elem[0] +=10;});
+        /// assert_eq!(tup, (vec![30], vec![31], vec![22], vec![23]));
+        /// ```
+        fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'a, Self::B, N>;
+    }
+
+    macro_rules! impl_tuple_itern {
+        ($($n:tt $t:tt),+) => {
+            impl<'a, T> TupleItern<'a> for ($($t,)+)
+                {
+                    type A = T;
+                    type B = T;
+                    fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'_, Self::A, N> {
+                        TupleImut {
+                            arr: std::array::from_fn(|i| match i {
+                                $($n => &self.$n,)+
+                                _ => panic!(),
+                            }),
+                            idx_iter: 0..N,
+                        }
+                    }
+
+                    fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'_, Self::B, N> {
+                        TupleMut {
+                            arr: std::array::from_fn(|i| match i {
+                                $($n => &mut self.$n as *mut T,)+
+                                _ => panic!(),
+                            }),
+                            idx_iter: 0..N,
+                            _unused: PhantomData,
+                        }
+                    }
+                }
+        };
+    }
+
+    impl_tuple_itern!(0 T);
+    impl_tuple_itern!(0 T, 1 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
+    impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
+}
