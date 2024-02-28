@@ -18,3 +18,7 @@ itern = []
 
 [dev-dependencies]
 trybuild = "1.0.83"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

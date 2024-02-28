@@ -608,6 +608,7 @@ impl_tuple_iter!(11; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
 impl_tuple_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
 
 #[cfg(feature = "itern")]
+#[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
 pub mod trait_itern {
     use crate::structs::{TupleImut, TupleMut};
     use crate::PhantomData;

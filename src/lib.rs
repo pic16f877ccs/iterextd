@@ -4,6 +4,7 @@
     missing_debug_implementations,
     missing_copy_implementations
 )]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 //! Adapters that extend [`Iterator`] functionality.
 //!
@@ -63,6 +64,7 @@ pub use crate::structs::TupleImut;
 pub use crate::structs::TupleMut;
 
 #[cfg(feature = "itern")]
+#[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
 pub use crate::iterator::trait_itern::TupleItern;
 
 use core::fmt;
