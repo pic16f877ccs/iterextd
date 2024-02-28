@@ -620,7 +620,7 @@ pub mod trait_itern {
         /// The type of mutable references yielded by the tuple iterator.
         type B;
 
-        /// A tuple iterator that allows you to get each value by reference.
+        /// Creates an iterator from a tuple that returns elements by reference.
         ///
         /// The difference from the [tuple_iter](crate::TupleIter::tuple_iter) method is that it can get N elements.
         ///
@@ -643,7 +643,7 @@ pub mod trait_itern {
         /// ```
         fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'a, Self::A, N>;
 
-        /// A tuple iterator that allows you to get each value by mutable reference.
+        /// Creates an iterator from a tuple that returns elements by mutable reference.
         ///
         /// The difference from the [tuple_iter_mut](crate::TupleIter::tuple_iter_mut) method is that it can get N elements.
         ///
