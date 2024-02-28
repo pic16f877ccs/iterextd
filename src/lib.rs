@@ -42,12 +42,14 @@
 //!  let vec = iter.collect::<Vec<_>>();
 //!  assert_eq!(vec, vec![[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7]]);
 //! ```
+
+#[doc = include_str!("../README.md")]
 mod iterator;
 mod structs;
 
 pub use crate::iterator::IterExtd;
-pub use crate::iterator::TupleIter;
 pub use crate::iterator::TupleIntoIter;
+pub use crate::iterator::TupleIter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
@@ -67,10 +69,10 @@ pub use crate::structs::TupleMut;
 #[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
 pub use crate::iterator::trait_itern::TupleItern;
 
+use core::array::IntoIter;
 use core::fmt;
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Range;
 use core::ptr;
-use core::array::IntoIter;
