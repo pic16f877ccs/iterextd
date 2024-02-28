@@ -3,6 +3,7 @@ use crate::structs::{
     Previous, SkipStepBy, SliceCopied, StepByFn, TupleImut, TupleMut,
 };
 use crate::FusedIterator;
+use crate::IntoIter;
 use crate::MaybeUninit;
 use crate::PhantomData;
 
@@ -706,3 +707,46 @@ pub mod trait_itern {
     impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
     impl_tuple_itern!(0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
 }
+
+/// Tuple iterator, adds the ability to get elements by value.
+pub trait TupleIntoIter<T, const N: usize> {
+
+    /// Creates an iterator from a tuple that returns elements by value.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::{TupleIter, TupleIntoIter};
+    ///
+    /// let tup = ((1, 2, 3), (4, 5, 6), (7, 8, 9));
+    /// let iter = tup.tuple_iter();
+    /// let vec = iter.flat_map(|elem|{ elem.tuple_into_iter() }).collect::<Vec<_>>();
+    /// assert_eq!(vec, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    /// ```
+    fn tuple_into_iter(self) -> IntoIter<T, N>;
+}
+
+macro_rules! impl_tuple_into_iter {
+    ($N:tt; $($n:tt $t:tt),+) => {
+        impl<T> TupleIntoIter<T, $N> for ($($t,)+) {
+            fn tuple_into_iter(self) -> IntoIter<T, $N> {
+                [$(self.$n,)+].into_iter()
+            }
+        }
+    }
+}
+
+impl_tuple_into_iter!(1;  0 T);
+impl_tuple_into_iter!(2;  0 T, 1 T);
+impl_tuple_into_iter!(3;  0 T, 1 T, 2 T);
+impl_tuple_into_iter!(4;  0 T, 1 T, 2 T, 3 T);
+impl_tuple_into_iter!(5;  0 T, 1 T, 2 T, 3 T, 4 T);
+impl_tuple_into_iter!(6;  0 T, 1 T, 2 T, 3 T, 4 T, 5 T);
+impl_tuple_into_iter!(7;  0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T);
+impl_tuple_into_iter!(8;  0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T);
+impl_tuple_into_iter!(9;  0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T);
+impl_tuple_into_iter!(10; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T);
+impl_tuple_into_iter!(11; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
+impl_tuple_into_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);

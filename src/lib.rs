@@ -46,6 +46,7 @@ mod structs;
 
 pub use crate::iterator::IterExtd;
 pub use crate::iterator::TupleIter;
+pub use crate::iterator::TupleIntoIter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
@@ -70,3 +71,4 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Range;
 use core::ptr;
+use core::array::IntoIter;
