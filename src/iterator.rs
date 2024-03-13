@@ -6,6 +6,7 @@ use crate::FusedIterator;
 use crate::IntoIter;
 use crate::MaybeUninit;
 use crate::PhantomData;
+use crate::swap;
 
 impl<T: ?Sized> IterExtd for T where T: Iterator {}
 
@@ -751,3 +752,37 @@ impl_tuple_into_iter!(9;  0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T);
 impl_tuple_into_iter!(10; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T);
 impl_tuple_into_iter!(11; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
 impl_tuple_into_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
+
+impl<T: ?Sized> SwapIter<'_> for T where T: Iterator {}
+
+/// An iterator adapter that swaps elements in two sequences.
+pub trait SwapIter<'a>: Iterator {
+    /// Swaps elements in two sequences.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::SwapIter;
+    ///
+    /// let mut first_vec = [0, 1, 2, 3, 4, 5, 6, 7];
+    /// let mut second_vec = vec![10, 11, 12, 13, 14, 15];
+    /// let first_iter = first_vec.iter_mut().step_by(2);
+    /// let second_iter = second_vec.iter_mut().step_by(2);
+    /// let _ = first_iter.swap_elems(second_iter);
+    /// assert_eq!(first_vec, [10, 1, 12, 3, 14, 5, 6, 7]);
+    /// assert_eq!(second_vec, [0, 11, 2, 13, 4, 15]);
+    /// ```
+    fn swap_elems<I, T:'a>(self, mut other_iter: I)
+    where
+        I: Iterator<Item = &'a mut T>,
+        Self: Sized + Iterator<Item = &'a mut T>,
+    {
+        //while let Some(self_elem) = self.next() {
+        for self_elem in self {
+            let Some(other_elem) = other_iter.next() else { break; }; 
+            swap(self_elem, other_elem);
+        }
+    }
+}
