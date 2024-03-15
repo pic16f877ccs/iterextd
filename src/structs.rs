@@ -174,6 +174,64 @@ where
         }
     }
 }
+/// Iterator to step iterators by a given amount including the first and last element.
+#[derive(Debug, Clone)]
+pub struct InclusiveStepBy<I> {
+    iter: I,
+    firs_step: bool,
+    step: usize,
+}
+
+impl<I> Iterator for InclusiveStepBy<I>
+where
+    I: Iterator,
+{
+    type Item = I::Item;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.firs_step {
+            self.firs_step = false;
+            return self.iter.next();
+        }
+        let mut elem = self.iter.next()?;
+        for _ in 1..self.step {
+           if let Some(e) = self.iter.next() {
+               elem = e;
+           } else {
+               return Some(elem);
+           }
+        }
+        Some(elem)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (lower, upper) = self.iter.size_hint();
+        let div = |x: usize| {
+            if x == 0 {
+                0
+            } else {
+                (if (x - 1).wrapping_rem(self.step) == 0 {
+                    1
+                } else {
+                    2
+                }) + (x - 1) / self.step
+            }
+        };
+
+        (div(lower), upper.map(div))
+    }
+}
+
+impl<I: Iterator> InclusiveStepBy<I> {
+    
+    #[inline]
+    pub(super) fn new(iter: I, step: usize) -> InclusiveStepBy<I> {
+        InclusiveStepBy { iter, firs_step: true, step } }
+}
+
+impl<I> ExactSizeIterator for InclusiveStepBy<I> where I: ExactSizeIterator {}
 
 /// An iterator that yields three elements each iteration.
 #[derive(Clone)]

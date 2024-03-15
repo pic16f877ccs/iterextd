@@ -843,3 +843,108 @@ fn test_consume() {
         .consume();
     assert_eq!(arr, [10, 20, 30]);
 }
+
+#[test]
+fn test_inclusive_step_by() {
+    let arr: [u8; 0] = [];
+
+    let mut step = 1;
+    let vec_ext = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    let vec_std = arr.into_iter().step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec_ext, vec_std);
+
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    let vec_ext = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    let vec_std = arr.into_iter().step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec_ext, vec_std);
+
+    step = 2;
+    let vec_ext = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    let vec_std = arr.into_iter().step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec_ext, vec_std);
+
+    step = 3;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 3, 6, 8]);
+
+    step = 4;
+    let vec_ext = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    let vec_std = arr.into_iter().step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec_ext, vec_std);
+
+    step = 5;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 5, 8]);
+
+    step = 6;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 6, 8]);
+
+    step = 7;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 7, 8]);
+
+    step = 8;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 8]);
+
+    step = 9;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 8]);
+
+    step = 10;
+    let vec = arr.into_iter().inclusive_step_by(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![0, 8]);
+}
+
+#[test]
+fn test_inclusive_step_by_clone() {
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    let iter_ext = arr.iter().inclusive_step_by(1);
+    let iter_ext_cloned = iter_ext.clone();
+    let vec_ext = iter_ext.collect::<Vec<_>>();
+    let vec_ext_cloned = iter_ext_cloned.collect::<Vec<_>>();
+    assert_eq!(vec_ext, vec_ext_cloned);
+}
+
+#[test]
+fn test_inclusive_step_by_len() {
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    let mut step = 1;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    let vec_std_len = arr.iter().step_by(step).len();
+    assert_eq!(vec_ext_len, vec_std_len);
+
+    step = 2;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    let vec_std_len = arr.iter().step_by(step).len();
+    assert_eq!(vec_ext_len, vec_std_len);
+
+    step = 3;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec_ext_len, 4);
+
+    step = 4;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    let vec_std_len = arr.iter().step_by(step).len();
+    assert_eq!(vec_ext_len, vec_std_len);
+
+    step = 5;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec_ext_len, 3);
+
+    step = 6;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec_ext_len, 3);
+
+    step = 7;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec_ext_len, 3);
+
+    step = 8;
+    let vec_ext_len = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec_ext_len, 2);
+}

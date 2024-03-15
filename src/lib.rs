@@ -55,6 +55,7 @@ pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
 pub use crate::structs::CombineIters;
+pub use crate::structs::InclusiveStepBy;
 pub use crate::structs::LastTaken;
 pub use crate::structs::MapByThree;
 pub use crate::structs::MapByTwo;

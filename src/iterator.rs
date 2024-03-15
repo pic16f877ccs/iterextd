@@ -1,5 +1,5 @@
 use crate::structs::{
-    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, LastTaken, MapByThree, MapByTwo, MapIters,
+    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree, MapByTwo, MapIters,
     Previous, SkipStepBy, SliceCopied, StepByFn, TupleImut, TupleMut,
 };
 use crate::FusedIterator;
@@ -220,6 +220,36 @@ pub trait IterExtd: Iterator {
             other_part_len,
             other_counter: 1,
         }
+    }
+
+    /// Creates an iterator that performs the given step at each iteration, returning inclusive of the first and last element.
+    ///
+    /// If there are elements smaller than the remaining step, the last element will be returned.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the step size is zero.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    /// let iter = arr.into_iter().inclusive_step_by(4);
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![0, 4, 8, 9]);
+    /// ```
+    #[inline]
+    fn inclusive_step_by(self, step: usize) -> InclusiveStepBy<Self>
+    where
+        Self: Sized,
+    {
+        assert!(step != 0);
+        //InclusiveStepBy { iter: self, firs_step: true, step, }
+        InclusiveStepBy::new(self, step)
     }
 
     /// Creates an iterator that yields two elements per iteration.
