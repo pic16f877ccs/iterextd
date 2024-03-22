@@ -174,12 +174,69 @@ where
         }
     }
 }
+
+/// An iterator to determine the boundaries of each step in a sequence.
+#[derive(Debug, Clone)]
+pub struct StepBoundary<I> {
+    iter: I,
+    size: usize,
+}
+
+impl<I: Iterator> StepBoundary<I> {
+    pub(super) fn new(iter: I, size: usize) -> StepBoundary<I> {
+        StepBoundary { iter, size }
+    }
+}
+
+impl<I> Iterator for StepBoundary<I>
+where
+    I: Iterator,
+    <I as Iterator>::Item: Copy,
+{
+    type Item = (I::Item, I::Item);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let start = self.iter.next()?;
+        let mut start_end = (start, start);
+        for _ in 1..self.size {
+            if let Some(e) = self.iter.next() {
+                start_end.1 = e;
+            } else {
+                return Some(start_end);
+            }
+        }
+        Some(start_end)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (lower, upper) = self.iter.size_hint();
+        let div = |x: usize| {
+            if x == 0 {
+                0
+            } else {
+                1 + (x - 1) / self.size
+            }
+        };
+
+        (div(lower), upper.map(div))
+    }
+}
+
 /// Iterator to step iterators by a given amount including the first and last element.
 #[derive(Debug, Clone)]
 pub struct InclusiveStepBy<I> {
     iter: I,
     firs_step: bool,
     step: usize,
+}
+
+impl<I> ExactSizeIterator for StepBoundary<I>
+where
+    I: ExactSizeIterator,
+    <I as Iterator>::Item: Copy,
+{
 }
 
 impl<I> Iterator for InclusiveStepBy<I>
@@ -196,11 +253,11 @@ where
         }
         let mut elem = self.iter.next()?;
         for _ in 1..self.step {
-           if let Some(e) = self.iter.next() {
-               elem = e;
-           } else {
-               return Some(elem);
-           }
+            if let Some(e) = self.iter.next() {
+                elem = e;
+            } else {
+                return Some(elem);
+            }
         }
         Some(elem)
     }
@@ -225,10 +282,14 @@ where
 }
 
 impl<I: Iterator> InclusiveStepBy<I> {
-    
     #[inline]
     pub(super) fn new(iter: I, step: usize) -> InclusiveStepBy<I> {
-        InclusiveStepBy { iter, firs_step: true, step } }
+        InclusiveStepBy {
+            iter,
+            firs_step: true,
+            step,
+        }
+    }
 }
 
 impl<I> ExactSizeIterator for InclusiveStepBy<I> where I: ExactSizeIterator {}

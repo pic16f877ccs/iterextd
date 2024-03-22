@@ -1,12 +1,13 @@
 use crate::structs::{
-    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree, MapByTwo, MapIters,
-    Previous, SkipStepBy, SliceCopied, StepByFn, TupleImut, TupleMut,
+    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree,
+    MapByTwo, MapIters, Previous, SkipStepBy, SliceCopied, StepBoundary, StepByFn, TupleImut,
+    TupleMut,
 };
+use crate::swap;
 use crate::FusedIterator;
 use crate::IntoIter;
 use crate::MaybeUninit;
 use crate::PhantomData;
-use crate::swap;
 
 impl<T: ?Sized> IterExtd for T where T: Iterator {}
 
@@ -222,6 +223,34 @@ pub trait IterExtd: Iterator {
         }
     }
 
+    /// Create an indexes iterator with a start and end for each step.
+    ///
+    /// With each iteration, it furnishes the start and end indices of the current step,
+    /// while also accounting for any residual elements in the last incomplete step.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the step size is zero.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let s = "slice index iterator";
+    /// let iter = (0..s.len()).step_boundary(3);
+    /// iter.for_each(|bounds| { println!("{:?}", &s[bounds.0..=bounds.1] ); });
+    /// ```
+    fn step_boundary(self, size: usize) -> StepBoundary<Self>
+    where
+        Self: Sized,
+    {
+        assert!(size != 0);
+        StepBoundary::new(self, size)
+    }
+
     /// Creates an iterator that performs the given step at each iteration, returning inclusive of the first and last element.
     ///
     /// If there are elements smaller than the remaining step, the last element will be returned.
@@ -242,7 +271,6 @@ pub trait IterExtd: Iterator {
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![0, 4, 8, 9]);
     /// ```
-    #[inline]
     fn inclusive_step_by(self, step: usize) -> InclusiveStepBy<Self>
     where
         Self: Sized,
@@ -742,7 +770,6 @@ pub mod trait_itern {
 
 /// Tuple iterator, adds the ability to get elements by value.
 pub trait TupleIntoIter<T, const N: usize> {
-
     /// Creates an iterator from a tuple that returns elements by value.
     ///
     /// # Examples
@@ -804,14 +831,16 @@ pub trait SwapIter<'a>: Iterator {
     /// assert_eq!(first_vec, [10, 1, 12, 3, 14, 5, 6, 7]);
     /// assert_eq!(second_vec, [0, 11, 2, 13, 4, 15]);
     /// ```
-    fn swap_elems<I, T:'a>(self, mut other_iter: I)
+    fn swap_elems<I, T: 'a>(self, mut other_iter: I)
     where
         I: Iterator<Item = &'a mut T>,
         Self: Sized + Iterator<Item = &'a mut T>,
     {
         //while let Some(self_elem) = self.next() {
         for self_elem in self {
-            let Some(other_elem) = other_iter.next() else { break; }; 
+            let Some(other_elem) = other_iter.next() else {
+                break;
+            };
             swap(self_elem, other_elem);
         }
     }

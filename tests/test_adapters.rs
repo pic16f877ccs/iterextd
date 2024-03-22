@@ -911,9 +911,14 @@ fn test_inclusive_step_by_clone() {
 
 #[test]
 fn test_inclusive_step_by_len() {
-    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    let arr: [u8; 0] = [];
 
     let mut step = 1;
+    let vec = arr.iter().inclusive_step_by(step).len();
+    assert_eq!(vec, 0);
+
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
     let vec_ext_len = arr.iter().inclusive_step_by(step).len();
     let vec_std_len = arr.iter().step_by(step).len();
     assert_eq!(vec_ext_len, vec_std_len);
@@ -947,4 +952,118 @@ fn test_inclusive_step_by_len() {
     step = 8;
     let vec_ext_len = arr.iter().inclusive_step_by(step).len();
     assert_eq!(vec_ext_len, 2);
+}
+
+#[test]
+fn test_step_boundary_len() {
+    let arr: [u8; 0] = [];
+
+    let mut step = 1;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 0);
+
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+
+    let vec_ext_len = arr.iter().step_boundary(step).len();
+    let vec_std_len = arr.iter().step_by(step).len();
+    assert_eq!(vec_ext_len, vec_std_len);
+
+    step = 2;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 5);
+
+    step = 3;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 3);
+
+    step = 4;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 3);
+
+    step = 5;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 2);
+
+    step = 6;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 2);
+
+    step = 7;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 2);
+
+    step = 8;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 2);
+
+    step = 9;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 1);
+
+    step = 10;
+    let vec = arr.iter().step_boundary(step).len();
+    assert_eq!(vec, 1);
+}
+
+#[test]
+fn test_step_boundary() {
+    let arr: [u8; 0] = [];
+
+    let mut step = 1;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![]);
+
+    let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    step = 1;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(
+        vec,
+        vec![
+            (0, 0),
+            (1, 1),
+            (2, 2),
+            (3, 3),
+            (4, 4),
+            (5, 5),
+            (6, 6),
+            (7, 7),
+            (8, 8)
+        ]
+    );
+
+    step = 2;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 1), (2, 3), (4, 5), (6, 7), (8, 8)]);
+
+    step = 3;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8)]);
+
+    step = 4;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 3), (4, 7), (8, 8)]);
+
+    step = 5;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 4), (5, 8)]);
+
+    step = 6;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 5), (6, 8)]);
+
+    step = 7;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 6), (7, 8)]);
+
+    step = 8;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 7), (8, 8)]);
+
+    step = 9;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 8)]);
+
+    step = 10;
+    let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
+    assert_eq!(vec, vec![(0, 8)]);
 }
