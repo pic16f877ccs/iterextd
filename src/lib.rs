@@ -60,6 +60,8 @@ pub use crate::structs::LastTaken;
 pub use crate::structs::MapByThree;
 pub use crate::structs::MapByTwo;
 pub use crate::structs::MapIters;
+pub use crate::structs::RangeToTup;
+pub use crate::structs::RangeIcvToTup;
 pub use crate::structs::Previous;
 pub use crate::structs::SkipStepBy;
 pub use crate::structs::SliceCopied;
@@ -67,6 +69,8 @@ pub use crate::structs::StepBoundary;
 pub use crate::structs::StepByFn;
 pub use crate::structs::TupleImut;
 pub use crate::structs::TupleMut;
+pub use crate::structs::TupToRange;
+pub use crate::structs::TupToRangeIcv;
 
 #[cfg(feature = "itern")]
 #[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
@@ -77,5 +81,5 @@ use core::fmt;
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
 use core::mem::{swap, MaybeUninit};
-use core::ops::Range;
+use core::ops::{Range, RangeInclusive};
 use core::ptr;

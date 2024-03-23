@@ -1,9 +1,10 @@
 use crate::fmt;
+
 use crate::ptr;
 use crate::MaybeUninit;
 use crate::PhantomData;
-use crate::Range;
 use crate::{Fuse, FusedIterator};
+use crate::{Range, RangeInclusive};
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -541,6 +542,59 @@ where
     }
 }
 
+/// An iterator that converts a [`Range`] at each iteration to a tuple.
+#[derive(Debug, Clone)]
+pub struct RangeToTup<I> {
+    pub(crate) iter: I,
+}
+
+impl<I, T> Iterator for RangeToTup<I>
+where
+    I: Iterator<Item = Range<T>>,
+{
+    type Item = (T, T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let range = self.iter.next()?;
+        Some((range.start, range.end))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+impl<I, T> ExactSizeIterator for RangeToTup<I> where I: ExactSizeIterator<Item = Range<T>> {}
+
+/// An iterator that converts a [`RangeInclusive`] at each iteration to a tuple.
+#[derive(Debug, Clone)]
+pub struct RangeIcvToTup<I> {
+    pub(crate) iter: I,
+}
+
+impl<I, T> Iterator for RangeIcvToTup<I>
+where
+    I: Iterator<Item = RangeInclusive<T>>,
+{
+    type Item = (T, T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let range = self.iter.next()?;
+        Some(range.into_inner())
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+impl<I, T> ExactSizeIterator for RangeIcvToTup<I> where
+    I: ExactSizeIterator<Item = RangeInclusive<T>>
+{
+}
+
 /// Iterator adapter with skip and step capabilities in one.
 #[derive(Debug, Clone)]
 pub struct SkipStepBy<I> {
@@ -644,6 +698,59 @@ where
     T: Copy,
 {
 }
+
+/// An iterator that converts a tuple at each iteration to a [`Range`].
+#[derive(Debug, Clone)]
+pub struct TupToRange<I> {
+    pub(crate) iter: I,
+}
+
+impl<I, T> Iterator for TupToRange<I>
+where
+    I: Iterator<Item = (T, T)>,
+{
+    type Item = Range<T>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let tup = self.iter.next()?;
+        Some(Range {
+            start: tup.0,
+            end: tup.1,
+        })
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+impl<I, T> ExactSizeIterator for TupToRange<I> where I: ExactSizeIterator<Item = (T, T)> {}
+
+/// An iterator that converts a tuple at each iteration to a [`RangeInclusive`].
+#[derive(Debug, Clone)]
+pub struct TupToRangeIcv<I> {
+    pub(crate) iter: I,
+}
+
+impl<I, T> Iterator for TupToRangeIcv<I>
+where
+    I: Iterator<Item = (T, T)>,
+{
+    type Item = RangeInclusive<T>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        let tup = self.iter.next()?;
+        Some(RangeInclusive::new(tup.0, tup.1))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.iter.size_hint()
+    }
+}
+
+impl<I, T> ExactSizeIterator for TupToRangeIcv<I> where I: ExactSizeIterator<Item = (T, T)> {}
 
 #[inline]
 fn copy_from_slice<T, const N: usize>(slice: &[T]) -> [T; N]

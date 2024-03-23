@@ -1067,3 +1067,51 @@ fn test_step_boundary() {
     let vec = arr.into_iter().step_boundary(step).collect::<Vec<_>>();
     assert_eq!(vec, vec![(0, 8)]);
 }
+
+#[test]
+fn test_to_range() {
+    let arr_tup = [(0, 2), (3, 5), (6, 8), (7, 9)];
+
+    let iter = arr_tup.into_iter().to_range();
+    assert_eq!(iter.len(), 4);
+    let vec_cloned = iter.clone().collect::<Vec<_>>();
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec_cloned);
+    assert_eq!(vec, vec![0..2, 3..5, 6..8, 7..9]);
+}
+
+#[test]
+fn test_to_range_icv() {
+    let arr_tup = [(0, 2), (3, 5), (6, 8), (7, 9), (10, 12)];
+
+    let iter = arr_tup.iter().cloned().to_range_icv();
+    assert_eq!(iter.len(), 5);
+    let vec_cloned = iter.clone().collect::<Vec<_>>();
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec_cloned);
+    assert_eq!(vec, vec![0..=2, 3..=5, 6..=8, 7..=9, 10..=12]);
+}
+
+#[test]
+fn test_to_tuple() {
+    let arr_ran = [0..2, 3..5];
+
+    let iter = arr_ran.into_iter().to_tuple();
+    assert_eq!(iter.len(), 2);
+    let vec_cloned = iter.clone().collect::<Vec<_>>();
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec_cloned);
+    assert_eq!(vec, vec![(0, 2), (3, 5)]);
+}
+
+#[test]
+fn test_to_tuple_icv() {
+    let arr_ran_icv = [0..=2, 3..=5, 6..=8];
+
+    let iter = arr_ran_icv.into_iter().to_tuple_icv();
+    assert_eq!(iter.len(), 3);
+    let vec_cloned = iter.clone().collect::<Vec<_>>();
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec_cloned);
+    assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8),]);
+}

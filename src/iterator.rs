@@ -1,7 +1,7 @@
 use crate::structs::{
     ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree,
-    MapByTwo, MapIters, Previous, SkipStepBy, SliceCopied, StepBoundary, StepByFn, TupleImut,
-    TupleMut,
+    MapByTwo, MapIters, Previous, RangeIcvToTup, RangeToTup, SkipStepBy, SliceCopied, StepBoundary,
+    StepByFn, TupToRange, TupToRangeIcv, TupleImut, TupleMut,
 };
 use crate::swap;
 use crate::FusedIterator;
@@ -488,6 +488,90 @@ pub trait IterExtd: Iterator {
             f,
             skip: 0,
         }
+    }
+
+    /// Return an iterator that converts a tuple at each iteration to a [RangeInclusive](crate::RangeInclusive).
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [(0, 2), (3, 5), (6, 8),];
+    /// let iter = arr.iter().cloned().to_range_icv();
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![0..=2, 3..=5, 6..=8]);
+    /// ```
+    fn to_range_icv(self) -> TupToRangeIcv<Self>
+    where
+        Self: Sized,
+    {
+        TupToRangeIcv { iter: self }
+    }
+
+    /// Return an iterator that converts a tuple at each iteration to a [Range](crate::Range).
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [(0, 2), (3, 5), (6, 8),];
+    /// let iter = arr.iter().cloned().to_range();
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![0..2, 3..5, 6..8]);
+    /// ```
+    fn to_range(self) -> TupToRange<Self>
+    where
+        Self: Sized,
+    {
+        TupToRange { iter: self }
+    }
+
+    /// Return an iterator that converts a [Range](crate::Range) at each iteration to a tuple.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [0..2, 3..5, 6..8];
+    /// let iter = arr.iter().cloned().to_tuple();
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8),]);
+    /// ```
+    fn to_tuple(self) -> RangeToTup<Self>
+    where
+        Self: Sized,
+    {
+        RangeToTup { iter: self }
+    }
+
+    /// Return an iterator that converts a [RangeInclusive](crate::RangeInclusive) at each iteration to a tuple.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [0..=2, 3..=5, 6..=8];
+    /// let iter = arr.iter().cloned().to_tuple_icv();
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8),]);
+    /// ```
+    fn to_tuple_icv(self) -> RangeIcvToTup<Self>
+    where
+        Self: Sized,
+    {
+        RangeIcvToTup { iter: self }
     }
 }
 
