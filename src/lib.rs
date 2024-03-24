@@ -45,12 +45,16 @@
 
 #[doc = include_str!("../README.md")]
 mod iterator;
+mod slice_modif_iter;
 mod structs;
 
 pub use crate::iterator::IterExtd;
 pub use crate::iterator::SwapIter;
 pub use crate::iterator::TupleIntoIter;
 pub use crate::iterator::TupleIter;
+pub use crate::slice_modif_iter::GenRngBnds;
+pub use crate::slice_modif_iter::SliceModif;
+pub use crate::slice_modif_iter::SliceModifIter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
@@ -60,17 +64,17 @@ pub use crate::structs::LastTaken;
 pub use crate::structs::MapByThree;
 pub use crate::structs::MapByTwo;
 pub use crate::structs::MapIters;
-pub use crate::structs::RangeToTup;
-pub use crate::structs::RangeIcvToTup;
 pub use crate::structs::Previous;
+pub use crate::structs::RangeIcvToTup;
+pub use crate::structs::RangeToTup;
 pub use crate::structs::SkipStepBy;
 pub use crate::structs::SliceCopied;
 pub use crate::structs::StepBoundary;
 pub use crate::structs::StepByFn;
-pub use crate::structs::TupleImut;
-pub use crate::structs::TupleMut;
 pub use crate::structs::TupToRange;
 pub use crate::structs::TupToRangeIcv;
+pub use crate::structs::TupleImut;
+pub use crate::structs::TupleMut;
 
 #[cfg(feature = "itern")]
 #[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
@@ -83,3 +87,4 @@ use core::marker::PhantomData;
 use core::mem::{swap, MaybeUninit};
 use core::ops::{Range, RangeInclusive};
 use core::ptr;
+use core::slice::SliceIndex;
