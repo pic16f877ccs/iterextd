@@ -94,10 +94,14 @@ pub struct GenRngBnds {
 
 impl Iterator for GenRngBnds {
     type Item = RangeInclusive<usize>;
+
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let tuple = self.iter.next()?;
         Some(RangeInclusive::new(tuple.0, tuple.1))
     }
+
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
@@ -138,6 +142,7 @@ where
 {
     type Item = &'a mut [T];
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let idx = self.iter.next()?;
         Some(unsafe { &mut (*self.ptr)[idx] })

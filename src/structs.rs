@@ -1,5 +1,4 @@
 use crate::fmt;
-
 use crate::ptr;
 use crate::MaybeUninit;
 use crate::PhantomData;
@@ -36,6 +35,7 @@ where
     I: ExactSizeIterator<Item = [&'a T; N]>,
     T: Copy,
 {
+    #[inline]
     fn len(&self) -> usize {
         self.iter.len()
     }
@@ -78,6 +78,7 @@ where
     I: ExactSizeIterator<Item = [&'a T; N]>,
     T: Clone,
 {
+    #[inline]
     fn len(&self) -> usize {
         self.iter.len()
     }
@@ -326,6 +327,7 @@ where
     F: FnMut(I::Item, I::Item, I::Item) -> B,
 {
     type Item = B;
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter.next() {
@@ -372,6 +374,7 @@ where
     F: FnMut(I::Item, I::Item) -> B,
 {
     type Item = B;
+
     #[inline]
     fn next(&mut self) -> Option<B> {
         match self.iter.next() {
@@ -429,6 +432,7 @@ where
     F: FnMut(&mut I, &mut K) -> Option<B>,
 {
     type Item = B;
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         (self.f)(&mut self.iter_self, &mut self.iter_other)
@@ -478,6 +482,7 @@ where
     <I as Iterator>::Item: Copy,
 {
     type Item = I::Item;
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.item = Some(self.iter.next()?);
@@ -523,6 +528,7 @@ where
     I::Item: Clone,
 {
     type Item = (I::Item, I::Item);
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let prev = self.item.clone();
@@ -560,6 +566,7 @@ where
         Some((range.start, range.end))
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
@@ -585,6 +592,7 @@ where
         Some(range.into_inner())
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
@@ -608,6 +616,7 @@ where
     I: Iterator,
 {
     type Item = I::Item;
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let elem = self.iter.nth(self.skip);
@@ -615,6 +624,7 @@ where
         elem
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
         let div = |x: usize| {
@@ -658,6 +668,7 @@ where
     F: FnMut(&mut usize) -> usize,
 {
     type Item = I::Item;
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let ret = (self.f)(&mut self.skip);
@@ -686,6 +697,7 @@ where
     T: Copy,
 {
     type Item = [T; N];
+
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         Some(copy_from_slice::<T, N>(self.iter.next()?))
@@ -720,6 +732,7 @@ where
         })
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
@@ -745,6 +758,7 @@ where
         Some(RangeInclusive::new(tup.0, tup.1))
     }
 
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         self.iter.size_hint()
     }
