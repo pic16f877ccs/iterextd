@@ -1,12 +1,11 @@
-use crate::PhantomData;
-use crate::SliceIndex;
-use crate::{IterExtd, StepBoundary};
+use crate::{SliceIndex, IterExtd, StepBoundary};
 use crate::{Range, RangeInclusive};
+use crate::PhantomData;
 
-impl<T> SliceModifIter<T> for [T] {}
+impl<T> SliceModifyIter<T> for [T] {}
 
 /// Iterator with external slice indexing.
-pub trait SliceModifIter<T>
+pub trait SliceModifyIter<T>
 where
     Self: AsMut<[T]> + AsRef<[T]>,
 {
@@ -21,17 +20,17 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use iterextd::SliceModifIter;
+    /// use iterextd::SliceModifyIter;
     ///
     /// let val = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     ///
-    /// let iter = val.gen_rng_bnds(3);
+    /// let iter = val.gen_range_bounds(3);
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![0..=2, 3..=5, 6..=8, 9..=10]);
     /// ```
-    fn gen_rng_bnds(&self, size: usize) -> GenRngBnds {
+    fn gen_range_bounds(&self, size: usize) -> GenRangeBounds {
         assert!(size != 0);
-        GenRngBnds {
+        GenRangeBounds {
             iter: (0..self.as_ref().len()).step_boundary(size),
         }
     }
@@ -47,25 +46,25 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use iterextd::SliceModifIter;
+    /// use iterextd::SliceModifyIter;
     ///
     /// let val = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    /// let iter = val.gen_tup_bnds(3);
+    /// let iter = val.gen_tuple_bounds(3);
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8), (9, 10)]);
     /// ```
-    fn gen_tup_bnds(&self, size: usize) -> StepBoundary<Range<usize>> {
+    fn gen_tuple_bounds(&self, size: usize) -> StepBoundary<Range<usize>> {
         assert!(size != 0);
         (0..self.as_ref().len()).step_boundary(size)
     }
 
-    /// Create an Iterator with external slice indexing.
+    /// Modify a slice using an iterator with external slice indexing.
     ///
     /// ```
-    /// use iterextd::SliceModifIter;
+    /// use iterextd::SliceModifyIter;
     ///
     /// let mut vec = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    /// let iter = vec.gen_rng_bnds(2);
+    /// let iter = vec.gen_range_bounds(2);
     /// let logic = |e: &mut[i32]| {
     ///     if e.len() == 2 {
     ///         let one = e[0];
@@ -73,26 +72,26 @@ where
     ///         e[1] = one;
     ///     }
     /// };
-    /// let _ = vec.slice_modif(iter, logic);
+    /// let _ = vec.modify_slice(iter, logic);
     /// assert_eq!(vec, vec![1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 10]);
     /// ```
-    fn slice_modif<F, I>(&mut self, iter: I, f: F)
+    fn modify_slice<F, I>(&mut self, iter: I, f: F)
     where
         I: Iterator,
         <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,
         F: FnMut(&mut [T]),
     {
-        SliceModif::<T, I>::new(self.as_mut(), iter).for_each(f);
+        SliceModify::<T, I>::new(self.as_mut(), iter).for_each(f);
     }
 }
 
 /// An iterator that allows creating RangeInclusive slice boundaries.
 #[derive(Debug, Clone)]
-pub struct GenRngBnds {
+pub struct GenRangeBounds {
     iter: StepBoundary<Range<usize>>,
 }
 
-impl Iterator for GenRngBnds {
+impl Iterator for GenRangeBounds {
     type Item = RangeInclusive<usize>;
 
     #[inline]
@@ -107,11 +106,11 @@ impl Iterator for GenRngBnds {
     }
 }
 
-impl ExactSizeIterator for GenRngBnds {}
+impl ExactSizeIterator for GenRangeBounds {}
 
 /// An iterator that allows modification of a slice.
 #[derive(Debug, Clone)]
-pub struct SliceModif<'a, T: 'a, I>
+pub struct SliceModify<'a, T: 'a, I>
 where
     I: Iterator,
     <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,
@@ -121,7 +120,7 @@ where
     _marker: PhantomData<&'a mut T>,
 }
 
-impl<'a, T: 'a, I> SliceModif<'a, T, I>
+impl<'a, T: 'a, I> SliceModify<'a, T, I>
 where
     I: Iterator,
     <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,
@@ -135,7 +134,7 @@ where
     }
 }
 
-impl<'a, T, I> Iterator for SliceModif<'a, T, I>
+impl<'a, T, I> Iterator for SliceModify<'a, T, I>
 where
     I: Iterator,
     <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,

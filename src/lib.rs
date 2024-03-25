@@ -45,16 +45,16 @@
 
 #[doc = include_str!("../README.md")]
 mod iterator;
-mod slice_modif_iter;
+mod slice_modify_iter;
 mod structs;
 
 pub use crate::iterator::IterExtd;
 pub use crate::iterator::SwapIter;
 pub use crate::iterator::TupleIntoIter;
 pub use crate::iterator::TupleIter;
-pub use crate::slice_modif_iter::GenRngBnds;
-pub use crate::slice_modif_iter::SliceModif;
-pub use crate::slice_modif_iter::SliceModifIter;
+pub use crate::slice_modify_iter::GenRangeBounds;
+pub use crate::slice_modify_iter::SliceModify;
+pub use crate::slice_modify_iter::SliceModifyIter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
