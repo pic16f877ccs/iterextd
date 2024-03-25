@@ -1,6 +1,6 @@
 # iterextd
 
-Adapters that extend [`Iterator`] functionality.
+Adapters that extend `Iterator` functionality.
 
 ## Example Usages
 
