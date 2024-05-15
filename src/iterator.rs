@@ -2,12 +2,17 @@ use crate::structs::{
     ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree,
     MapByTwo, MapIters, Previous, RangeIcvToTup, RangeToTup, SkipStepBy, SliceCopied, StepBoundary,
     StepByFn, TupToRange, TupToRangeIcv, TupleImut, TupleMut,
-};
+ MissingIntegers,};
 use crate::swap;
 use crate::FusedIterator;
 use crate::IntoIter;
 use crate::MaybeUninit;
 use crate::PhantomData;
+use crate::FixedBitSet;
+use crate::Itertools;
+use crate::MinMax;
+use crate::{ToZero, TryFromByAdd};
+use crate::{Deref, Range};
 
 impl<T: ?Sized> IterExtd for T where T: Iterator {}
 
@@ -351,6 +356,110 @@ pub trait IterExtd: Iterator {
         Self: Sized,
     {
         MapIters::new(self, k, f)
+    }
+
+    /// Return an iterator adapter that yields missing integers.
+    /// Note that the maximum value of an iterator element must be less than or equal to
+    /// `usize::MAX` for unsigned type and `isize::MAX for signed`!
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [9u8, 5, 6, 4, 8, 8, 2, 4, 10, 2, 12];
+    /// let vec = arr.iter().missing_integers().collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![3, 7, 11]);
+    /// ```
+    fn missing_integers(mut self) -> MissingIntegers<Self>
+    where
+        Self: Iterator + Sized + Clone,
+        <Self as Iterator>::Item: PartialOrd + Deref,
+        <<Self as Iterator>::Item as Deref>::Target: Copy,
+        usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
+    {
+        let (min, size) = match self.clone().minmax() {
+            MinMax(min, max) => {
+                let min_max = (<usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*min),
+                    <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*max));
+                match min_max {
+                    (Some(min), Some(max)) => (min, max - min + 1),
+                    _ => return MissingIntegers::default(),
+                }
+            }
+            _ => return MissingIntegers::default(),
+        };
+
+        let mut bitset = FixedBitSet::with_capacity(size);
+        bitset.toggle_range(..);
+
+        match self.try_for_each(|x| {
+            if let Some(val) = <usize as TryFromByAdd<
+                <<Self as Iterator>::Item as Deref>::Target,
+            >>::try_from_by_add(*x)
+            {
+                bitset.remove(val - min);
+                Some(())
+            } else {
+                None
+            }
+        }) {
+            Some(_) => MissingIntegers {
+                iter: bitset.into_ones(),
+                min,
+                _phantom: PhantomData,
+            },
+            _ => MissingIntegers::default(),
+        }
+    }
+
+    /// Returns an iterator adapter that finds missing integers.
+    /// This adapter must use a unique and sorted iterator.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let mut vec = vec![-2i8, 2, 4, 5, 6, 8, 9, 10, 12];
+    /// let mut iter = vec.iter().missing_integers_uqsort();
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![-1, 0, 1, 3, 7, 11]);
+    /// ```
+    fn missing_integers_uqsort(
+        self,
+    ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item>
+    where
+        Self: Iterator + Sized + Clone,
+        <Self as Iterator>::Item: PartialOrd + Deref,
+        <<Self as Iterator>::Item as Deref>::Target: Copy + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
+        Range<<<Self as Iterator>::Item as Deref>::Target>: Iterator,
+        <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item:
+            PartialOrd<<<Self as Iterator>::Item as Deref>::Target>,
+    {
+        let (min, max) = match self.clone().minmax() {
+            MinMax(min, max) => (*min, *max),
+            _ => ( 
+                <<Self as Iterator>::Item as Deref>::Target::to_zero(),
+                <<Self as Iterator>::Item as Deref>::Target::to_zero(),
+                ),
+        };
+
+        (min..max).map_iters(self.peekable(), |range_it, seq_it| {
+            for range_val in range_it.by_ref() {
+                if range_val >= **seq_it.peek()? {
+                    seq_it.next();
+                    continue;
+                } else {
+                    return Some(range_val);
+                };
+            }
+            None
+        })
     }
 
     /// The iterator adapter provides the ability to obtain a tuple of two values (last, current) at each iteration.

@@ -12,13 +12,22 @@ categories = ["algorithms", "rust-patterns", "data-structures"]
 description = "This trait provides additional methods for working with iterators, enhancing their functionality."
 
 [dependencies]
+fixedbitset = "0.5.7"
+itertools = "0.12.1"
+num_convert = { version = "0.7.1" }
 
 [features]
 itern = []
 
 [dev-dependencies]
 trybuild = "1.0.83"
+criterion = "0.5.1"
+
+[[bench]]
+name = "bench_missing_int"
+harness = false
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+

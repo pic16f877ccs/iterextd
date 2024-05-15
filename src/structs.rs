@@ -4,6 +4,9 @@ use crate::MaybeUninit;
 use crate::PhantomData;
 use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
+use crate::{FixedBitSet, IntoOnes};
+use crate::TryFromByAdd;
+use crate::Deref;
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -438,6 +441,44 @@ where
         (self.f)(&mut self.iter_self, &mut self.iter_other)
     }
 }
+
+/// An iterator adapter that returns missing numbers.
+#[allow(missing_debug_implementations)]
+pub struct MissingIntegers<I> {
+    pub(crate) iter: IntoOnes,
+    pub(crate) min: usize,
+    pub(crate) _phantom: PhantomData<I>,
+}
+
+impl<I> MissingIntegers<I> {
+    #[inline]
+    pub(crate) fn default() -> Self {
+        MissingIntegers {
+            iter: FixedBitSet::new().into_ones(),
+            min: 0,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<I> Iterator for MissingIntegers<I>
+where
+    I: Iterator,
+    <I as Iterator>::Item: Deref,
+    <<I as Iterator>::Item as Deref>::Target: Sized + TryFromByAdd<usize>,
+{
+    type Item = <<I as Iterator>::Item as Deref>::Target;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|x| {
+            <<<I as Iterator>::Item as Deref>::Target as TryFromByAdd<usize>>::try_from_by_add(
+                x + self.min,
+            )
+        })?
+    }
+}
+
 
 /// An iterator adapter that preserves the element of the last iteration.
 #[derive(Debug, Clone)]
