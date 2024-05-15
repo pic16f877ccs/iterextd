@@ -2,7 +2,7 @@ use crate::structs::{
     ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree,
     MapByTwo, MapIters, Previous, RangeIcvToTup, RangeToTup, SkipStepBy, SliceCopied, StepBoundary,
     StepByFn, TupToRange, TupToRangeIcv, TupleImut, TupleMut,
- MissingIntegers,};
+ MissingIntegers, UniqueSorted};
 use crate::swap;
 use crate::FusedIterator;
 use crate::IntoIter;
@@ -682,6 +682,60 @@ pub trait IterExtd: Iterator {
     {
         RangeIcvToTup { iter: self }
     }
+
+    /// Return an iterator adapter that yields unique sorted integers.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [9u8, 5, 6, 4, 8, 8, 2, 4, 10, 2, 12];
+    /// let vec = arr.iter().unique_sorted().collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![2, 4, 5, 6, 8, 9, 10, 12]);
+    /// ```
+    fn unique_sorted(mut self) -> UniqueSorted<Self>
+    where
+        Self: Iterator + Sized + Clone,
+        <Self as Iterator>::Item: PartialOrd + Deref,
+        <<Self as Iterator>::Item as Deref>::Target: Copy,
+        usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
+    {
+        let (min, size) = match self.clone().minmax() {
+            MinMax(min, max) => {
+                let min_max = (<usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*min),
+                    <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*max));
+                match min_max {
+                    (Some(min), Some(max)) => (min, max - min + 1),
+                    _ => return UniqueSorted::default(),
+                }
+            }
+            _ => return UniqueSorted::default(),
+        };
+
+        let mut bitset = FixedBitSet::with_capacity(size);
+
+        match self.try_for_each(|x| {
+            if let Some(val) = <usize as TryFromByAdd<
+                <<Self as Iterator>::Item as Deref>::Target,
+            >>::try_from_by_add(*x)
+            {
+                bitset.insert(val - min);
+                Some(())
+            } else {
+                None
+            }
+        }) {
+            Some(_) => UniqueSorted {
+                iter: bitset.into_ones(),
+                min,
+                _phantom: PhantomData,
+            },
+            _ => UniqueSorted::default(),
+        }
+    }
 }
 
 pub trait AllowZero {}
@@ -1035,6 +1089,48 @@ pub trait SwapIter<'a>: Iterator {
                 break;
             };
             swap(self_elem, other_elem);
+        }
+    }
+
+    /// Return an iterator adapter that yields unique sorted intergers.
+    fn unique_sorted(mut self) -> UniqueSorted<Self>
+    where
+        Self: Iterator + Sized + Clone,
+        <Self as Iterator>::Item: PartialOrd + Deref,
+        <<Self as Iterator>::Item as Deref>::Target: Copy,
+        usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
+    {
+        let (min, size) = match self.clone().minmax() {
+            MinMax(min, max) => {
+                let min_max = (<usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*min),
+                    <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*max));
+                match min_max {
+                    (Some(min), Some(max)) => (min, max - min + 1),
+                    _ => return UniqueSorted::default(),
+                }
+            }
+            _ => return UniqueSorted::default(),
+        };
+
+        let mut bitset = FixedBitSet::with_capacity(size);
+
+        match self.try_for_each(|x| {
+            if let Some(val) = <usize as TryFromByAdd<
+                <<Self as Iterator>::Item as Deref>::Target,
+            >>::try_from_by_add(*x)
+            {
+                bitset.insert(val - min);
+                Some(())
+            } else {
+                None
+            }
+        }) {
+            Some(_) => UniqueSorted {
+                iter: bitset.into_ones(),
+                min,
+                _phantom: PhantomData,
+            },
+            _ => UniqueSorted::default(),
         }
     }
 }

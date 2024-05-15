@@ -27,6 +27,10 @@ criterion = "0.5.1"
 name = "bench_missing_int"
 harness = false
 
+[[bench]]
+name = "bench_unique_sort"
+harness = false
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

@@ -834,3 +834,55 @@ pub struct TupleMut<'a, T: 'a, const N: usize> {
     pub(crate) idx_iter: Range<usize>,
     pub(crate) _unused: PhantomData<&'a mut T>,
 }
+
+#[allow(missing_debug_implementations)]
+pub struct UniqueSorted<I> {
+    pub(crate) iter: IntoOnes,
+    pub(crate) min: usize,
+    pub(crate) _phantom: PhantomData<I>,
+}
+
+impl<I> UniqueSorted<I> {
+    #[inline]
+    pub(crate) fn default() -> Self {
+        UniqueSorted {
+            iter: FixedBitSet::new().into_ones(),
+            min: 0,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<I> Iterator for UniqueSorted<I>
+where
+    I: Iterator,
+    <I as Iterator>::Item: Deref,
+    <<I as Iterator>::Item as Deref>::Target: Sized + TryFromByAdd<usize>,
+{
+    type Item = <<I as Iterator>::Item as Deref>::Target;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|x| {
+            <<<I as Iterator>::Item as Deref>::Target as TryFromByAdd<usize>>::try_from_by_add(
+                x + self.min,
+            )
+        })?
+    }
+}
+
+impl<I> DoubleEndedIterator for UniqueSorted<I>
+where
+    I: DoubleEndedIterator,
+    <I as Iterator>::Item: Deref,
+    <<I as Iterator>::Item as Deref>::Target: Sized + TryFromByAdd<usize>,
+{
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|x| {
+            <<<I as Iterator>::Item as Deref>::Target as TryFromByAdd<usize>>::try_from_by_add(
+                x + self.min,
+            )
+        })?
+    }
+}
