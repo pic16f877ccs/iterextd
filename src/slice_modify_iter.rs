@@ -28,6 +28,7 @@ where
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![0..=2, 3..=5, 6..=8, 9..=10]);
     /// ```
+    #[inline]
     fn gen_range_bounds(&self, size: usize) -> GenRangeBounds {
         assert!(size != 0);
         GenRangeBounds {
@@ -53,12 +54,17 @@ where
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8), (9, 10)]);
     /// ```
+    #[inline]
     fn gen_tuple_bounds(&self, size: usize) -> StepBoundary<Range<usize>> {
         assert!(size != 0);
         (0..self.as_ref().len()).step_boundary(size)
     }
 
     /// Modify a slice using an iterator with external slice indexing.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
     ///
     /// ```
     /// use iterextd::SliceModifyIter;
@@ -75,6 +81,7 @@ where
     /// let _ = vec.modify_slice(iter, logic);
     /// assert_eq!(vec, vec![1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 10]);
     /// ```
+    #[inline]
     fn modify_slice<F, I>(&mut self, iter: I, f: F)
     where
         I: Iterator,
@@ -125,6 +132,7 @@ where
     I: Iterator,
     <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,
 {
+    #[inline]
     fn new(slice: &'a mut [T], iter: I) -> Self {
         Self {
             ptr: slice,

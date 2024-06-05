@@ -15,7 +15,9 @@ description = "This trait provides additional methods for working with iterators
 [dependencies]
 fixedbitset = "0.5.7"
 itertools = "0.12.1"
-num_convert = { version = "0.7.1" }
+num_convert = "0.7.1"
+num-integer = "0.1.46"
+num = "0.4.3"
 
 [features]
 itern = []
@@ -30,6 +32,10 @@ harness = false
 
 [[bench]]
 name = "bench_unique_sort"
+harness = false
+
+[[bench]]
+name = "bench_extrapolate"
 harness = false
 
 [package.metadata.docs.rs]

@@ -1,18 +1,24 @@
 use crate::structs::{
-    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, InclusiveStepBy, LastTaken, MapByThree,
-    MapByTwo, MapIters, Previous, RangeIcvToTup, RangeToTup, SkipStepBy, SliceCopied, StepBoundary,
-    StepByFn, TupToRange, TupToRangeIcv, TupleImut, TupleMut,
- MissingIntegers, UniqueSorted};
+    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy, LastTaken,
+    MapByThree, MapByTwo, MapIters, MissingIntegers, Previous, RangeIcvToTup, RangeToTup,
+    SkipStepBy, SliceCopied, StepBoundary, StepByFn, TupToRange, TupToRangeIcv, TupleImut,
+    TupleMut, UniqueSorted,
+};
 use crate::swap;
-use crate::FusedIterator;
-use crate::IntoIter;
-use crate::MaybeUninit;
-use crate::PhantomData;
+use crate::Debug;
 use crate::FixedBitSet;
+use crate::FusedIterator;
+use crate::Hash;
+use crate::HashMap;
+use crate::IntoIter;
 use crate::Itertools;
+use crate::MaybeUninit;
 use crate::MinMax;
-use crate::{ToZero, TryFromByAdd};
+use crate::PhantomData;
+use crate::Zero;
+use crate::{gcd, Integer};
 use crate::{Deref, Range};
+use crate::{ToZero, TryFromByAdd};
 
 impl<T: ?Sized> IterExtd for T where T: Iterator {}
 
@@ -35,6 +41,7 @@ pub trait IterExtd: Iterator {
     /// Returns an iterator over the N elements of the base iterator per iteration.
     ///
     /// # Panics
+    ///
     /// Panics if N is 0.
     ///
     /// # Examples
@@ -71,10 +78,10 @@ pub trait IterExtd: Iterator {
     /// let vec_cloned = iter.collect::<Vec<_>>();
     /// assert_eq!(vec_cloned, vec![["iter".to_string(), "array".to_string()], ["chunk".to_string(), "pointer".to_string()]]);
     /// ```
-    fn array_cloned<'a, T: 'a, const N: usize>(self) -> ArrayCloned<Self, N>
+    fn array_cloned<'a, T, const N: usize>(self) -> ArrayCloned<Self, N>
     where
         Self: Sized + Iterator<Item = [&'a T; N]>,
-        T: Clone,
+        T: Clone + 'a,
     {
         ArrayCloned::new(self)
     }
@@ -93,10 +100,10 @@ pub trait IterExtd: Iterator {
     /// let vec_copied = iter.collect::<Vec<_>>();
     /// assert_eq!(vec_copied, vec![[1, 2], [3, 4]]);
     /// ```
-    fn array_copied<'a, T: 'a, const N: usize>(self) -> ArrayCopied<Self, N>
+    fn array_copied<'a, T, const N: usize>(self) -> ArrayCopied<Self, N>
     where
         Self: Sized + Iterator<Item = [&'a T; N]>,
-        T: Copy,
+        T: Copy + 'a,
     {
         ArrayCopied::new(self)
     }
@@ -104,6 +111,7 @@ pub trait IterExtd: Iterator {
     /// Collect a zeroed array for nullable types.
     ///
     /// # Panics
+    ///
     /// Panics if N is 0.
     ///
     /// # Examples
@@ -133,12 +141,14 @@ pub trait IterExtd: Iterator {
             arr[idx] = elem;
             index = idx;
         }
+
         (index + 1, arr)
     }
 
     /// Create an array from an iterator.
     ///
     /// # Panics
+    ///
     /// Panics if N is 0 or N greater than the length of the iterator.
     ///
     /// # Examples
@@ -185,6 +195,8 @@ pub trait IterExtd: Iterator {
     /// Combine two iterators in parts sequentially.
     /// The length of the piece can be set for each separately.
     ///
+    /// # Panics
+    ///
     /// Panics if both `basic_repeats` and `other_repeats` are 0.
     ///
     /// # Examples
@@ -226,6 +238,107 @@ pub trait IterExtd: Iterator {
             other_part_len,
             other_counter: 1,
         }
+    }
+
+    /// Counts the frequency of each element in the iterator.
+    ///
+    /// # Warning
+    ///
+    /// The results are stored in a `HashMap`, which does not preserve the order of the elements.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let vec = vec![1, 2, 2, 3, 3, 3];
+    /// let mut freqs = vec.into_iter().count_freq().collect::<Vec<_>>();
+    /// freqs.sort();
+    /// assert_eq!(freqs, vec![(1, 1), (2, 2), (3, 3)]);
+    /// ```
+    #[cfg(feature = "use_std")]
+    fn count_freq(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
+    where
+        Self: Sized,
+        Self::Item: Eq + Hash + Debug,
+    {
+        let mut hash_map = HashMap::new();
+        for item in self {
+            hash_map
+                .entry(item)
+                .and_modify(|count| *count += 1)
+                .or_insert(1);
+        }
+
+        hash_map.into_iter()
+    }
+
+    /// Extrapolates the iterator's elements.
+    ///
+    /// # Panics
+    ///
+    /// This method will panic in debug mode if the extrapolated values cause a computation overflow.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr: [f32; 2] = [0.00, 0.01];
+    /// let extrapolated = arr.into_iter().extrapolate().take(5).collect::<Vec<_>>();
+    /// assert_eq!(extrapolated, vec![0.0, 0.01, 0.02, 0.03, 0.04]);
+    ///
+    /// let vec = vec![2, 5, 6, 9, 13];
+    /// let extrapolated: Vec<_> = vec.into_iter().extrapolate().take(10).collect();
+    /// assert_eq!(extrapolated, vec![2, 5, 6, 9, 13, 17, 21, 25, 29, 33]);
+    /// ```
+    fn extrapolate(self) -> Extrapolate<Self>
+    where
+        Self: Sized,
+        Self::Item: Zero,
+    {
+        Extrapolate {
+            iter: self,
+            arg_one: Self::Item::zero(),
+            arg_two: Self::Item::zero(),
+        }
+    }
+
+    /// Finds the greatest common divisor (GCD) of the elements in the iterator.
+    ///
+    /// # Notes
+    ///
+    /// - **NOTE:** This method will return `None` if the iterator is empty.
+    /// - **NOTE:** The minimum sequence length must be two elements; otherwise, `None` will be returned.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let vec = vec![24, 36, 48];
+    /// assert_eq!(vec.iter().gcd(), Some(12));
+    ///
+    /// let empty_vec: Vec<i32> = vec![];
+    /// assert_eq!(empty_vec.iter().gcd(), None);
+    ///
+    /// let single_element = vec![42];
+    /// assert_eq!(single_element.iter().gcd(), None);
+    /// ```
+    fn gcd(mut self) -> Option<<<Self as Iterator>::Item as Deref>::Target>
+    where
+        Self: Sized,
+        <Self as Iterator>::Item: Deref,
+        <<Self as Iterator>::Item as Deref>::Target: Integer + Copy,
+    {
+        let acc = gcd(*self.next()?, *self.next()?);
+        Some(self.fold(acc, |acc, x| gcd(acc, *x)))
     }
 
     /// Create an indexes iterator with a start and end for each step.
@@ -281,7 +394,6 @@ pub trait IterExtd: Iterator {
         Self: Sized,
     {
         assert!(step != 0);
-        //InclusiveStepBy { iter: self, firs_step: true, step, }
         InclusiveStepBy::new(self, step)
     }
 
@@ -436,17 +548,18 @@ pub trait IterExtd: Iterator {
     where
         Self: Iterator + Sized + Clone,
         <Self as Iterator>::Item: PartialOrd + Deref,
-        <<Self as Iterator>::Item as Deref>::Target: Copy + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
+        <<Self as Iterator>::Item as Deref>::Target:
+            Copy + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
         Range<<<Self as Iterator>::Item as Deref>::Target>: Iterator,
         <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item:
             PartialOrd<<<Self as Iterator>::Item as Deref>::Target>,
     {
         let (min, max) = match self.clone().minmax() {
             MinMax(min, max) => (*min, *max),
-            _ => ( 
+            _ => (
                 <<Self as Iterator>::Item as Deref>::Target::to_zero(),
                 <<Self as Iterator>::Item as Deref>::Target::to_zero(),
-                ),
+            ),
         };
 
         (min..max).map_iters(self.peekable(), |range_it, seq_it| {
@@ -460,6 +573,42 @@ pub trait IterExtd: Iterator {
             }
             None
         })
+    }
+
+    /// Finds the mode(s) of the iterator's elements.
+    ///
+    /// # Warning
+    ///
+    /// The results are stored in a `HashMap`, which does not preserve the order of the elements.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let vec = vec![1, 2, 2, 3, 3, 3, 3];
+    /// let modes = vec.into_iter().modes().collect::<Vec<_>>();
+    /// assert_eq!(modes, vec![(3, 4)]);
+    /// ```
+    #[cfg(feature = "use_std")]
+    fn modes(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
+    where
+        Self: Sized,
+        Self::Item: Eq + Hash + Debug,
+    {
+        let mut hash_map = HashMap::new();
+        let mut max: usize = 0;
+        for item in self {
+            let count = hash_map.entry(item).or_insert(0);
+            *count += 1;
+            if *count > max {
+                max = *count;
+            }
+        }
+
+        hash_map.into_iter().filter(move |&(_, count)| count == max)
     }
 
     /// The iterator adapter provides the ability to obtain a tuple of two values (last, current) at each iteration.
@@ -511,6 +660,7 @@ pub trait IterExtd: Iterator {
     /// Creates an iterator that copies a slice of all its elements.
     ///
     /// # Panics
+    ///
     /// Panics if the length of the slices is not equal.
     ///
     /// # Examples
@@ -535,9 +685,10 @@ pub trait IterExtd: Iterator {
         SliceCopied::new(self)
     }
 
-    /// An iterator adapter with combined ability to skip and step.
+    /// An iterator adapter with the combined ability to skip and step.
     ///
-    /// # Panic
+    /// # Panics
+    ///
     /// The method panics when the specified step is 0.
     ///
     /// # Examples
@@ -920,7 +1071,6 @@ pub mod trait_itern {
     use crate::PhantomData;
 
     /// A trait that allows iteration over N elements of a tuple.
-    ///
     pub trait TupleItern<'a> {
         /// The type of immutable references yielded by the tuple iterator.
         type A;
@@ -932,6 +1082,7 @@ pub mod trait_itern {
         /// The difference from the [tuple_iter](crate::TupleIter::tuple_iter) method is that it can get N elements.
         ///
         /// # Panics
+        ///
         /// If N is greater than the number of elements in the tuple, panic.
         ///
         /// # Examples
@@ -955,6 +1106,7 @@ pub mod trait_itern {
         /// The difference from the [tuple_iter_mut](crate::TupleIter::tuple_iter_mut) method is that it can get N elements.
         ///
         /// # Panics
+        ///
         /// If N is greater than the number of elements in the tuple, panic.
         ///
         /// # Examples
@@ -1041,7 +1193,7 @@ macro_rules! impl_tuple_into_iter {
                 [$(self.$n,)+].into_iter()
             }
         }
-    }
+    };
 }
 
 impl_tuple_into_iter!(1;  0 T);
@@ -1061,7 +1213,7 @@ impl<T: ?Sized> SwapIter<'_> for T where T: Iterator {}
 
 /// An iterator adapter that swaps elements in two sequences.
 pub trait SwapIter<'a>: Iterator {
-    /// Swaps elements in two sequences.
+    /// Swap elements between two mutable iterators.
     ///
     /// # Examples
     ///
@@ -1083,54 +1235,11 @@ pub trait SwapIter<'a>: Iterator {
         I: Iterator<Item = &'a mut T>,
         Self: Sized + Iterator<Item = &'a mut T>,
     {
-        //while let Some(self_elem) = self.next() {
         for self_elem in self {
             let Some(other_elem) = other_iter.next() else {
                 break;
             };
             swap(self_elem, other_elem);
-        }
-    }
-
-    /// Return an iterator adapter that yields unique sorted intergers.
-    fn unique_sorted(mut self) -> UniqueSorted<Self>
-    where
-        Self: Iterator + Sized + Clone,
-        <Self as Iterator>::Item: PartialOrd + Deref,
-        <<Self as Iterator>::Item as Deref>::Target: Copy,
-        usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
-    {
-        let (min, size) = match self.clone().minmax() {
-            MinMax(min, max) => {
-                let min_max = (<usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*min),
-                    <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(*max));
-                match min_max {
-                    (Some(min), Some(max)) => (min, max - min + 1),
-                    _ => return UniqueSorted::default(),
-                }
-            }
-            _ => return UniqueSorted::default(),
-        };
-
-        let mut bitset = FixedBitSet::with_capacity(size);
-
-        match self.try_for_each(|x| {
-            if let Some(val) = <usize as TryFromByAdd<
-                <<Self as Iterator>::Item as Deref>::Target,
-            >>::try_from_by_add(*x)
-            {
-                bitset.insert(val - min);
-                Some(())
-            } else {
-                None
-            }
-        }) {
-            Some(_) => UniqueSorted {
-                iter: bitset.into_ones(),
-                min,
-                _phantom: PhantomData,
-            },
-            _ => UniqueSorted::default(),
         }
     }
 }

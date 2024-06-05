@@ -2,11 +2,11 @@ use crate::fmt;
 use crate::ptr;
 use crate::MaybeUninit;
 use crate::PhantomData;
+use crate::TryFromByAdd;
+use crate::{Add, AddAssign, Deref, Sub};
+use crate::{FixedBitSet, IntoOnes};
 use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
-use crate::{FixedBitSet, IntoOnes};
-use crate::TryFromByAdd;
-use crate::Deref;
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -15,6 +15,7 @@ pub struct ArrayCopied<I, const N: usize> {
 }
 
 impl<I, const N: usize> ArrayCopied<I, N> {
+    #[inline]
     pub(super) fn new(iter: I) -> ArrayCopied<I, N> {
         ArrayCopied { iter }
     }
@@ -58,6 +59,7 @@ pub struct ArrayCloned<I, const N: usize> {
 }
 
 impl<I, const N: usize> ArrayCloned<I, N> {
+    #[inline]
     pub(super) fn new(iter: I) -> ArrayCloned<I, N> {
         ArrayCloned { iter }
     }
@@ -161,9 +163,7 @@ where
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         if self.self_counter == self.self_part_len {
-            let Some(other_elem) = self.other_iter.next() else {
-                return None;
-            };
+            let other_elem = self.other_iter.next()?;
             if self.other_counter == self.other_part_len {
                 self.self_counter = 0;
                 self.other_counter = 0;
@@ -171,11 +171,39 @@ where
             self.other_counter += 1;
             Some(other_elem)
         } else {
-            let Some(self_elem) = self.self_iter.next() else {
-                return None;
-            };
+            let self_elem = self.self_iter.next()?;
             self.self_counter += 1;
             Some(self_elem)
+        }
+    }
+}
+
+/// A struct for the extrapolate iterator adapter.
+#[derive(Debug, Clone)]
+pub struct Extrapolate<I: Iterator> {
+    pub(crate) iter: I,
+    pub(crate) arg_one: I::Item,
+    pub(crate) arg_two: I::Item,
+}
+
+impl<I> Iterator for Extrapolate<I>
+where
+    I: Iterator,
+    I::Item: Copy + AddAssign<I::Item> + Sub<Output = I::Item> + Add<Output = I::Item>,
+{
+    type Item = I::Item;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(elem) = self.iter.next() {
+            self.arg_one = self.arg_two;
+            self.arg_two = elem;
+            Some(elem)
+        } else {
+            let res = self.arg_two + (self.arg_two - self.arg_one);
+            self.arg_one = self.arg_two;
+            self.arg_two = res;
+            Some(res)
         }
     }
 }
@@ -188,6 +216,7 @@ pub struct StepBoundary<I> {
 }
 
 impl<I: Iterator> StepBoundary<I> {
+    #[inline]
     pub(super) fn new(iter: I, size: usize) -> StepBoundary<I> {
         StepBoundary { iter, size }
     }
@@ -319,6 +348,7 @@ where
 }
 
 impl<I, F> MapByThree<I, F> {
+    #[inline]
     pub(super) fn new(iter: I, f: F) -> MapByThree<I, F> {
         MapByThree { iter, f }
     }
@@ -366,6 +396,7 @@ where
 }
 
 impl<I, F> MapByTwo<I, F> {
+    #[inline]
     pub(super) fn new(iter: I, f: F) -> MapByTwo<I, F> {
         MapByTwo { iter, f }
     }
@@ -479,7 +510,6 @@ where
     }
 }
 
-
 /// An iterator adapter that preserves the element of the last iteration.
 #[derive(Debug, Clone)]
 pub struct LastTaken<I: Iterator> {
@@ -488,6 +518,7 @@ pub struct LastTaken<I: Iterator> {
 }
 
 impl<I: Iterator> LastTaken<I> {
+    #[inline]
     pub(super) fn new(iter: I, item: Option<I::Item>) -> LastTaken<I> {
         LastTaken { iter, item }
     }
@@ -558,6 +589,7 @@ where
     I: Iterator,
     I::Item: Clone,
 {
+    #[inline]
     pub(super) fn new(iter: I, item: I::Item) -> Previous<I> {
         Previous { iter, item }
     }
@@ -727,6 +759,7 @@ pub struct SliceCopied<I, const N: usize> {
 }
 
 impl<I, const N: usize> SliceCopied<I, N> {
+    #[inline]
     pub(super) fn new(iter: I) -> SliceCopied<I, N> {
         SliceCopied { iter }
     }

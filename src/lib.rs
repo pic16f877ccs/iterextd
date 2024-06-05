@@ -8,18 +8,26 @@
 
 //! Adapters that extend [`Iterator`] functionality.
 //!
-//! ### Variable step
+//! ### Variable step:
 //!
 //! ```
 //! use iterextd::IterExtd;
 //!
-//! let logic_fn = |s: &mut usize| { if *s == 0 { *s = 1; 1 } else { *s += 1; *s } };
+//! let logic_fn = |s: &mut usize| {
+//!     if *s == 0 {
+//!         *s = 1;
+//!     1
+//!     } else {
+//!         *s += 1;
+//!         *s
+//!     }
+//! };
 //! let iter = (0..18).step_by_fn(logic_fn);
 //! let vec = iter.collect::<Vec<_>>();
 //! assert_eq!(vec, vec![0, 2, 5, 9, 14]);
 //! ```
 //!
-//! ### Collect a zeroed array
+//! ### Collect a zeroed array:
 //!
 //! ```
 //! use iterextd::IterExtd;
@@ -30,17 +38,19 @@
 //! assert_eq!(arr, (5, [2, 4, 6, 8, 10, 0, 0, 0, 0, 0]));
 //! ```
 //!
-//! ### Collect windows from arrays.
+//! ### Collect windows from arrays:
 //!
 //! ```
 //! use iterextd::IterExtd;
 //!
-//!  let arr = [0, 1, 2, 3, 4, 5, 6, 7];
-//!  let iter = arr.into_iter();
-//!  let iter = iter.clone().map_iters(iter.previous(1).skip(2), |self_iter, arg_iter| {
-//!      let (pre_elem, elem) = arg_iter.next()?; Some([self_iter.next()?, pre_elem, elem]) });
-//!  let vec = iter.collect::<Vec<_>>();
-//!  assert_eq!(vec, vec![[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7]]);
+//! let arr = [0, 1, 2, 3, 4, 5, 6, 7];
+//! let iter = arr.into_iter();
+//! let iter = iter.clone().map_iters(iter.previous(1).skip(2), |self_iter, arg_iter| {
+//!     let (pre_elem, elem) = arg_iter.next()?;
+//!     Some([self_iter.next()?, pre_elem, elem])
+//! });
+//! let vec = iter.collect::<Vec<_>>();
+//! assert_eq!(vec, vec![[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7]]);
 //! ```
 
 #[doc = include_str!("../README.md")]
@@ -59,6 +69,7 @@ pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
 pub use crate::structs::CombineIters;
+pub use crate::structs::Extrapolate;
 pub use crate::structs::InclusiveStepBy;
 pub use crate::structs::LastTaken;
 pub use crate::structs::MapByThree;
@@ -82,14 +93,18 @@ pub use crate::structs::TupleMut;
 pub use crate::iterator::trait_itern::TupleItern;
 
 use core::array::IntoIter;
-use core::fmt;
+use core::fmt::{self, Debug};
+use core::hash::Hash;
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
 use core::mem::{swap, MaybeUninit};
-use core::ops::{Deref, Range, RangeInclusive};
+use core::ops::{Add, AddAssign, Deref, Range, RangeInclusive, Sub};
 use core::ptr;
 use core::slice::SliceIndex;
 use fixedbitset::{FixedBitSet, IntoOnes};
 use itertools::Itertools;
 use itertools::MinMaxResult::MinMax;
+use num::Zero;
 use num_convert::{ToZero, TryFromByAdd};
+use num_integer::{gcd, Integer};
+use std::collections::HashMap;
