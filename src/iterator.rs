@@ -258,7 +258,6 @@ pub trait IterExtd: Iterator {
     /// freqs.sort();
     /// assert_eq!(freqs, vec![(1, 1), (2, 2), (3, 3)]);
     /// ```
-    #[cfg(feature = "use_std")]
     fn count_freq(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
     where
         Self: Sized,
@@ -592,7 +591,6 @@ pub trait IterExtd: Iterator {
     /// let modes = vec.into_iter().modes().collect::<Vec<_>>();
     /// assert_eq!(modes, vec![(3, 4)]);
     /// ```
-    #[cfg(feature = "use_std")]
     fn modes(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
     where
         Self: Sized,
