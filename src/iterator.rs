@@ -543,12 +543,12 @@ pub trait IterExtd: Iterator {
     /// ```
     fn missing_integers_uqsort(
         self,
-    ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item>
+    ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item> + Debug
     where
-        Self: Iterator + Sized + Clone,
-        <Self as Iterator>::Item: PartialOrd + Deref,
+        Self: Iterator + Sized + Clone + Debug,
+        <Self as Iterator>::Item: PartialOrd + Deref + Debug,
         <<Self as Iterator>::Item as Deref>::Target:
-            Copy + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
+            Copy + Debug + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
         Range<<<Self as Iterator>::Item as Deref>::Target>: Iterator,
         <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item:
             PartialOrd<<<Self as Iterator>::Item as Deref>::Target>,
