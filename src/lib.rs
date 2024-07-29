@@ -70,6 +70,7 @@ pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;
 pub use crate::structs::CombineIters;
 pub use crate::structs::Extrapolate;
+pub use crate::structs::GenCirclePoints;
 pub use crate::structs::InclusiveStepBy;
 pub use crate::structs::LastTaken;
 pub use crate::structs::MapByThree;

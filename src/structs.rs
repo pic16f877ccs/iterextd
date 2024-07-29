@@ -7,6 +7,7 @@ use crate::{Add, AddAssign, Deref, Sub};
 use crate::{FixedBitSet, IntoOnes};
 use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
+use num::{Float, NumCast, traits::FloatConst};
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -207,6 +208,83 @@ where
         }
     }
 }
+
+/// Store data for generating circle points.
+#[derive(Debug, Clone)]
+pub struct GenCirclePoints<T> {
+    radius: T,
+    num_points: usize,
+    base_cos: T,
+    base_sin: T,
+    incr_cos: T,
+    incr_sin: T,
+}
+
+impl<T> GenCirclePoints<T>
+where
+    T: Add<T> + Float + NumCast + FloatConst,
+{
+    /// Create a new instance of `GenCirclePoints`.
+    ///
+    /// # Arguments
+    ///
+    /// * `radius` - radius of the generated circle points.
+    /// * `num_points` - sets the number of points.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let mut circle_points = GenCirclePoints::new(5.0_f64, 3);
+    /// let points = circle_points.collect::<Vec<_>>();
+    /// let formatted_points = format!("{:.3?}", points);
+    /// assert_eq!(formatted_points, "[(5.000, 0.000), (-2.500, 4.330), (-2.500, -4.330)]");
+    /// ```
+    #[inline]
+    pub fn new(radius: T, num_points: usize) -> Self {
+        let incr = T::TAU() / T::from(num_points).unwrap();
+        Self {
+            radius,
+            num_points,
+            base_cos: T::from(1.0).unwrap(),
+            base_sin: T::from(0.0).unwrap(),
+            incr_cos: T::from(2.0).unwrap() * ((incr * T::from(0.5).unwrap()).sin()).powi(2),
+            incr_sin: incr.sin(),
+        }
+    }
+}
+
+impl<T> Iterator for GenCirclePoints<T>
+where
+    T: Float,
+{
+    type Item = (T, T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.num_points == 0 {
+            return None;
+        }
+        self.num_points -= 1;
+
+        let cos_sin = (self.base_cos * self.radius, self.base_sin * self.radius);
+        let tmp_sin = self.base_sin;
+        self.base_sin = (self.incr_sin * self.base_cos - self.incr_cos * tmp_sin) + tmp_sin;
+        self.base_cos = (-self.incr_sin * tmp_sin - self.incr_cos * self.base_cos) + self.base_cos;
+        Some(cos_sin)
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.num_points, Some(self.num_points))
+    }
+}
+
+impl<T: Float> ExactSizeIterator for GenCirclePoints<T> {}
+impl<T: Float> FusedIterator for GenCirclePoints<T> {}
 
 /// An iterator to determine the boundaries of each step in a sequence.
 #[derive(Debug, Clone)]
