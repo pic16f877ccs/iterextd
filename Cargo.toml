@@ -25,6 +25,7 @@ itern = []
 [dev-dependencies]
 trybuild = "1.0.83"
 criterion = "0.5.1"
+approx = "0.5.1"
 
 [[bench]]
 name = "bench_missing_int"
