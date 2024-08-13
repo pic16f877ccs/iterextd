@@ -7,7 +7,7 @@ use crate::{Add, AddAssign, Deref, Sub};
 use crate::{FixedBitSet, IntoOnes};
 use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
-use num::{Float, NumCast, traits::FloatConst};
+use num::{traits::FloatConst, Float, NumCast};
 
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
@@ -236,7 +236,7 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use iterextd::IterExtd;
+    /// use iterextd::GenCirclePoints;
     ///
     /// let mut circle_points = GenCirclePoints::new(5.0_f64, 3);
     /// let points = circle_points.collect::<Vec<_>>();
@@ -648,6 +648,29 @@ where
     #[inline]
     fn len(&self) -> usize {
         self.iter.len()
+    }
+}
+
+/// The iterator adapter that offsets the points.
+#[derive(Debug, Clone)]
+pub struct Offset<T, I> {
+    pub(crate) iter: I,
+    pub(crate) offset_x: T,
+    pub(crate) offset_y: T,
+}
+
+impl<T, I> Iterator for Offset<T, I>
+where
+    I: Iterator<Item = (T, T)>,
+    T: Copy + Add<Output = T>,
+{
+    type Item = (T, T);
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter
+            .next()
+            .map(|(x, y)| (x + self.offset_x, y + self.offset_y))
     }
 }
 

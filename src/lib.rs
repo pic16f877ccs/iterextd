@@ -53,11 +53,11 @@
 //! assert_eq!(vec, vec![[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7]]);
 //! ```
 
+mod gen_iterator;
 #[doc = include_str!("../README.md")]
 mod iterator;
 mod slice_modify_iter;
 mod structs;
-mod gen_iterator;
 
 pub use crate::gen_iterator::CircleBresenhamSeq;
 pub use crate::iterator::IterExtd;
@@ -79,6 +79,7 @@ pub use crate::structs::MapByThree;
 pub use crate::structs::MapByTwo;
 pub use crate::structs::MapIters;
 pub use crate::structs::MissingIntegers;
+pub use crate::structs::Offset;
 pub use crate::structs::Previous;
 pub use crate::structs::RangeIcvToTup;
 pub use crate::structs::RangeToTup;

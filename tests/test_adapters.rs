@@ -1115,3 +1115,26 @@ fn test_to_tuple_icv() {
     assert_eq!(vec, vec_cloned);
     assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8),]);
 }
+
+
+#[test]
+fn test_offset_offset_clone() {
+    let arr_tup = [(0, 2), (3, 5), (6, 8)];
+    let iter = arr_tup.into_iter().offset(10, 10);
+    let clone_vec = iter.clone().collect::<Vec<_>>();
+    assert_eq!(clone_vec, vec![(10, 12), (13, 15), (16, 18)]);
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec![(10, 12), (13, 15), (16, 18)]);
+}
+
+#[test]
+fn test_offset_empty_debug() {
+    let arr_tup = [];
+    let iter = arr_tup.into_iter().offset(10, 10);
+    let vec = iter.collect::<Vec<_>>();
+    assert_eq!(vec, vec![]);
+    let arr_tup = [(10, 20)];
+    let iter = arr_tup.into_iter().offset(10, 10);
+    assert_eq!(format!("{:?}", iter),
+    "Offset { iter: IntoIter([(10, 20)]), offset_x: 10, offset_y: 10 }");
+}

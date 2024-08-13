@@ -1,4 +1,5 @@
 use crate::Debug;
+use crate::FusedIterator;
 use crate::{Add, AddAssign, Sub};
 use core::ops::{Mul, Neg};
 use num::Unsigned;
@@ -10,22 +11,6 @@ pub struct CircleBresenhamSeq<T> {
     y: T,
     err: T,
     i: u8,
-}
-
-impl<T> Default for CircleBresenhamSeq<T>
-where
-    T: From<i8>,
-{
-    /// Create a default instance of `CircleBresenhamSeq`.
-    #[inline]
-    fn default() -> Self {
-        Self {
-            x: 0.into(),
-            y: 0.into(),
-            err: 0.into(),
-            i: 4,
-        }
-    }
 }
 
 impl<T> CircleBresenhamSeq<T>
@@ -51,19 +36,34 @@ where
     #[inline]
     pub fn new<U>(radius: U) -> Self
     where
-        U: Copy + Unsigned + From<u8>,
+        U: Copy + Unsigned + From<u8> + PartialOrd,
         T: From<U>,
     {
-        if radius == 0.into() {
-            return Self::default();
+        if radius > U::from(0) {
+            return Self {
+                x: -T::from(radius),
+                y: 0.into(),
+                err: T::from(2) - T::from(2) * T::from(radius),
+                i: 1,
+            };
         }
 
-        let r = T::from(radius);
+        return Self::default();
+    }
+}
+
+impl<T> Default for CircleBresenhamSeq<T>
+where
+    T: From<i8>,
+{
+    /// Create a default instance of `CircleBresenhamSeq`.
+    #[inline]
+    fn default() -> Self {
         Self {
-            x: -r,
+            x: 0.into(),
             y: 0.into(),
-            err: T::from(2) - T::from(2) * r,
-            i: 1,
+            err: 0.into(),
+            i: 4,
         }
     }
 }
@@ -95,6 +95,7 @@ where
             self.y = T::from(0);
         }
 
+        let r = self.err;
         let xy = if self.i == 1 {
             (self.y, self.x)
         } else if self.i == 2 {
@@ -105,7 +106,6 @@ where
             (self.x, -self.y)
         };
 
-        let r = self.err;
         if r <= self.y {
             self.y += T::from(1);
             self.err += T::from(2) * self.y + T::from(1);
@@ -165,4 +165,16 @@ where
 
         Some(xy)
     }
+}
+
+impl<T> FusedIterator for CircleBresenhamSeq<T> where
+    T: Add<Output = T>
+        + From<i8>
+        + Neg<Output = T>
+        + Sub<Output = T>
+        + Mul<Output = T>
+        + Copy
+        + PartialOrd
+        + AddAssign
+{
 }

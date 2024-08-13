@@ -1,6 +1,6 @@
 use crate::structs::{
     ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy, LastTaken,
-    MapByThree, MapByTwo, MapIters, MissingIntegers, Previous, RangeIcvToTup, RangeToTup,
+    MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup, RangeToTup,
     SkipStepBy, SliceCopied, StepBoundary, StepByFn, TupToRange, TupToRangeIcv, TupleImut,
     TupleMut, UniqueSorted,
 };
@@ -543,7 +543,8 @@ pub trait IterExtd: Iterator {
     /// ```
     fn missing_integers_uqsort(
         self,
-    ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item> + Debug
+    ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item>
+           + Debug
     where
         Self: Iterator + Sized + Clone + Debug,
         <Self as Iterator>::Item: PartialOrd + Deref + Debug,
@@ -607,6 +608,39 @@ pub trait IterExtd: Iterator {
         }
 
         hash_map.into_iter().filter(move |&(_, count)| count == max)
+    }
+
+    /// The iterator adapter adds an offset to a two-element tuple.
+    ///
+    /// # Warning
+    ///
+    /// When using this iterator adapter, the output value may overflow.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::{CircleBresenhamSeq, IterExtd};
+    ///
+    /// let radius = 1_u8;
+    /// let center_x = radius as i32;
+    /// let center_y = radius as i32;
+    /// let iter = CircleBresenhamSeq::<i32>::new(radius);
+    /// let circle_with_offset = iter.offset(center_x, center_y);
+    /// let vec = circle_with_offset.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![(1, 0), (2, 1), (1, 2), (0, 1)]);
+    /// ```
+    #[inline]
+    fn offset<T>(self, offset_x: T, offset_y: T) -> Offset<T, Self>
+    where
+        Self: Sized + Iterator,
+    {
+        Offset {
+            iter: self,
+            offset_x,
+            offset_y,
+        }
     }
 
     /// The iterator adapter provides the ability to obtain a tuple of two values (last, current) at each iteration.

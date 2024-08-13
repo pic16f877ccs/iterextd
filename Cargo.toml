@@ -43,6 +43,10 @@ harness = false
 name = "bench_gen_circle_points"
 harness = false
 
+[[bench]]
+name = "bench_bresenham_circle"
+harness = false
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
