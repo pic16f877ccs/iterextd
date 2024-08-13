@@ -57,7 +57,9 @@
 mod iterator;
 mod slice_modify_iter;
 mod structs;
+mod gen_iterator;
 
+pub use crate::gen_iterator::CircleBresenhamSeq;
 pub use crate::iterator::IterExtd;
 pub use crate::iterator::SwapIter;
 pub use crate::iterator::TupleIntoIter;
