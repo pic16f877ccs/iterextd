@@ -334,29 +334,61 @@ fn test_tuple_iterator_double_ended_struct() {
 #[test]
 fn test_tuple_iterator_exact_size_str() {
     let tup = ("hello", "world");
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+
+    let tuple = (1, 2, 3, 4, 5);
+    let mut tuple_iter = tuple.tuple_iter();
+    assert_eq!(tuple_iter.len(), 5);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 4);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 3);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 2);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 1);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 0);
 }
 
 #[test]
 fn test_tuple_iterator_exact_size_string() {
     let tup = (String::from("foo"), String::from("bar"));
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }
 
 #[test]
 fn test_tuple_iterator_exact_size_numbers() {
     let tup = (1.0, 2.5, -3.0);
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 3);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }
 
 #[test]
 fn test_tuple_iterator_exact_size_vec() {
     let tup = (vec![1, 2, 3], vec![4, 5, 6]);
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }
 
 #[test]
@@ -366,8 +398,14 @@ fn test_tuple_iterator_exact_size_enum() {
         TestEnum::VariantB(42),
         TestEnum::VariantC(String::from("enum")),
     );
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 3);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }
 
 #[test]
@@ -382,8 +420,12 @@ fn test_tuple_iterator_exact_size_struct() {
             field2: String::from("tuple"),
         },
     );
-    let tup_iter = tup.tuple_iter();
+    let mut tup_iter = tup.tuple_iter();
     assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }
 
 #[test]
@@ -654,4 +696,101 @@ fn test_tuple_mut_iter_5() {
         assert_eq!(iter.next(), Some(&mut i));
     }
     assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_str() {
+    let mut tup = ("hello", "world");
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+
+    let mut tuple = (1, 2, 3, 4, 5);
+    let mut tuple_iter = tuple.tuple_iter_mut();
+    assert_eq!(tuple_iter.len(), 5);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 4);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 3);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 2);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 1);
+    let _ = tuple_iter.next();
+    assert_eq!(tuple_iter.len(), 0);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_string() {
+    let mut tup = (String::from("foo"), String::from("bar"));
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_numbers() {
+    let mut tup = (1.0, 2.5, -3.0);
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 3);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_vec() {
+    let mut tup = (vec![1, 2, 3], vec![4, 5, 6]);
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_enum() {
+    let mut tup = (
+        TestEnum::VariantA,
+        TestEnum::VariantB(42),
+        TestEnum::VariantC(String::from("enum")),
+    );
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 3);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
+}
+
+#[test]
+fn test_tuple_mut_iterator_exact_size_struct() {
+    let mut tup = (
+        TestStruct {
+            field1: 10,
+            field2: String::from("struct"),
+        },
+        TestStruct {
+            field1: 20,
+            field2: String::from("tuple"),
+        },
+    );
+    let mut tup_iter = tup.tuple_iter_mut();
+    assert_eq!(tup_iter.len(), 2);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 1);
+    let _ = tup_iter.next();
+    assert_eq!(tup_iter.len(), 0);
 }

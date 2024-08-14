@@ -1046,13 +1046,13 @@ impl<'a, T, const N: usize> DoubleEndedIterator for TupleImut<'a, T, N> {
 impl<'a, T, const N: usize> ExactSizeIterator for TupleMut<'a, T, N> {
     #[inline]
     fn len(&self) -> usize {
-        self.arr.len()
+        self.idx_iter.len()
     }
 }
 impl<'a, T, const N: usize> ExactSizeIterator for TupleImut<'a, T, N> {
     #[inline]
     fn len(&self) -> usize {
-        self.arr.len()
+        self.idx_iter.len()
     }
 }
 
