@@ -8,8 +8,6 @@ use crate::swap;
 use crate::Debug;
 use crate::FixedBitSet;
 use crate::FusedIterator;
-use crate::Hash;
-use crate::HashMap;
 use crate::IntoIter;
 use crate::Itertools;
 use crate::MaybeUninit;
@@ -19,6 +17,11 @@ use crate::Zero;
 use crate::{gcd, Integer};
 use crate::{Deref, Range};
 use crate::{ToZero, TryFromByAdd};
+
+#[cfg(feature = "std")]
+use crate::Hash;
+#[cfg(feature = "std")]
+use crate::HashMap;
 
 impl<T: ?Sized> IterExtd for T where T: Iterator {}
 
@@ -258,6 +261,7 @@ pub trait IterExtd: Iterator {
     /// freqs.sort();
     /// assert_eq!(freqs, vec![(1, 1), (2, 2), (3, 3)]);
     /// ```
+    #[cfg(feature = "std")]
     fn count_freq(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
     where
         Self: Sized,
@@ -592,6 +596,7 @@ pub trait IterExtd: Iterator {
     /// let modes = vec.into_iter().modes().collect::<Vec<_>>();
     /// assert_eq!(modes, vec![(3, 4)]);
     /// ```
+    #[cfg(feature = "std")]
     fn modes(self) -> impl Iterator<Item = (Self::Item, usize)> + Debug
     where
         Self: Sized,

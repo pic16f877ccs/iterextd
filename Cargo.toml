@@ -1,6 +1,6 @@
 [package]
 name = "iterextd"
-version = "0.5.0"
+version = "0.6.0"
 rust-version = "1.75.0"
 edition = "2021"
 authors = ["Karl Wulfert <pic16f877.ccs@emailn.de>"]
@@ -20,7 +20,9 @@ num-integer = "0.1.46"
 num = "0.4.3"
 
 [features]
+default = ["std"]
 itern = []
+std = []
 
 [dev-dependencies]
 trybuild = "1.0.83"

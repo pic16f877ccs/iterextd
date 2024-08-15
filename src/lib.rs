@@ -5,6 +5,7 @@
     missing_copy_implementations
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 //! Adapters that extend [`Iterator`] functionality.
 //!
@@ -95,10 +96,13 @@ pub use crate::structs::TupleMut;
 #[cfg(feature = "itern")]
 #[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
 pub use crate::iterator::trait_itern::TupleItern;
+#[cfg(feature = "std")]
+use core::hash::Hash;
+#[cfg(feature = "std")]
+use std::collections::HashMap;
 
 use core::array::IntoIter;
 use core::fmt::{self, Debug};
-use core::hash::Hash;
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
 use core::mem::{swap, MaybeUninit};
@@ -111,4 +115,3 @@ use itertools::MinMaxResult::MinMax;
 use num::Zero;
 use num_convert::{ToZero, TryFromByAdd};
 use num_integer::{gcd, Integer};
-use std::collections::HashMap;

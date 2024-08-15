@@ -51,7 +51,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-iterextd = "0.5.0"
+iterextd = "0.6.0"
 ```
 
 ## License

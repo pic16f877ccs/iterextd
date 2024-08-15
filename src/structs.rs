@@ -420,7 +420,7 @@ where
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("MapByThree")
             .field("iter", &self.iter)
-            .field("f", &format!("{:p}", &self.f))
+            .field("f", &format_args!("{:p}", &self.f))
             .finish()
     }
 }
@@ -468,7 +468,7 @@ where
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("MapByTwo")
             .field("iter", &self.iter)
-            .field("f", &format!("{:p}", &self.f))
+            .field("f", &format_args!("{:p}", &self.f))
             .finish()
     }
 }
@@ -516,7 +516,7 @@ where
         fmt.debug_struct("MapIters")
             .field("iter_self", &self.iter_self)
             .field("iter_other", &self.iter_other)
-            .field("f", &format!("{:p}", &self.f))
+            .field("f", &format_args!("{:p}", &self.f))
             .finish()
     }
 }
@@ -831,7 +831,7 @@ where
         fmt.debug_struct("StepByFn")
             .field("iter", &self.iter)
             .field("skip", &self.skip)
-            .field("f", &format!("{:p}", &self.f))
+            .field("f", &format_args!("{:p}", &self.f))
             .finish()
     }
 }
