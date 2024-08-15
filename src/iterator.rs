@@ -1168,7 +1168,7 @@ pub mod trait_itern {
                     type B = T;
                     fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'_, Self::A, N> {
                         TupleImut {
-                            arr: std::array::from_fn(|i| match i {
+                            arr: core::array::from_fn(|i| match i {
                                 $($n => &self.$n,)+
                                 _ => panic!(),
                             }),
@@ -1178,7 +1178,7 @@ pub mod trait_itern {
 
                     fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'_, Self::B, N> {
                         TupleMut {
-                            arr: std::array::from_fn(|i| match i {
+                            arr: core::array::from_fn(|i| match i {
                                 $($n => &mut self.$n as *mut T,)+
                                 _ => panic!(),
                             }),

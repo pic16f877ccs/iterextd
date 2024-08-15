@@ -48,7 +48,7 @@ where
             };
         }
 
-        return Self::default();
+        Self::default()
     }
 }
 
