@@ -55,12 +55,15 @@
 //! ```
 
 mod gen_iterator;
+mod integer_scaling_iterator;
 #[doc = include_str!("../README.md")]
 mod iterator;
 mod slice_modify_iter;
 mod structs;
 
 pub use crate::gen_iterator::CircleBresenhamSeq;
+pub use crate::integer_scaling_iterator::Scaler;
+pub use crate::integer_scaling_iterator::Scaling;
 pub use crate::iterator::IterExtd;
 pub use crate::iterator::SwapIter;
 pub use crate::iterator::TupleIntoIter;
@@ -106,12 +109,12 @@ use core::fmt::{self, Debug};
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
 use core::mem::{swap, MaybeUninit};
-use core::ops::{Add, AddAssign, Deref, Range, RangeInclusive, Sub};
+use core::ops::{Add, AddAssign, Deref, Div, Mul, Range, RangeInclusive, Sub};
 use core::ptr;
 use core::slice::SliceIndex;
 use fixedbitset::{FixedBitSet, IntoOnes};
 use itertools::Itertools;
-use itertools::MinMaxResult::MinMax;
-use num::Zero;
+use itertools::MinMaxResult::{MinMax, NoElements, OneElement};
+use num::{one, zero, Bounded, CheckedMul, CheckedSub, One, Zero};
 use num_convert::{ToZero, TryFromByAdd};
 use num_integer::{gcd, Integer};
