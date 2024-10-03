@@ -138,7 +138,7 @@ where
     /// Basic usage:
     ///
     /// ```
-    /// use lesson_bithacks::Scaler;
+    /// use iterextd::Scaler;
     ///
     /// let iter = (0..=5u8).scaling::<u16>(..70u8);
     /// assert_eq!(iter.collect::<Vec<_>>(), vec![0, 14, 28, 42, 56, 70]);
