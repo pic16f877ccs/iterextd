@@ -886,6 +886,50 @@ where
 {
 }
 
+/// An iterator that takes `n` and skips `m` iterator elements cyclically.
+#[derive(Debug, Clone)]
+pub struct TakeSkipCyclic<I: Iterator> {
+    pub(crate) iter: I,
+    pub(crate) take: usize,
+    pub(crate) skip: usize,
+    pub(crate) count: usize,
+}
+
+impl<I> Iterator for TakeSkipCyclic<I>
+where
+    I: Iterator,
+{
+    type Item = I::Item;
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count == self.take {
+            self.count = 1;
+            self.iter.nth(self.skip)
+        } else {
+            self.count += 1;
+            self.iter.next()
+        }
+    }
+}
+
+impl<I> DoubleEndedIterator for TakeSkipCyclic<I>
+where
+    I: DoubleEndedIterator,
+{
+    #[inline]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.count == self.take {
+            self.count = 1;
+            self.iter.nth_back(self.skip)
+        } else {
+            self.count += 1;
+            self.iter.next_back()
+        }
+    }
+}
+
+impl<I> FusedIterator for TakeSkipCyclic<I> where I: FusedIterator {}
+
 /// An iterator that converts a tuple at each iteration to a [`Range`].
 #[derive(Debug, Clone)]
 pub struct TupToRange<I> {

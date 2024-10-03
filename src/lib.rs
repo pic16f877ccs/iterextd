@@ -91,6 +91,7 @@ pub use crate::structs::SkipStepBy;
 pub use crate::structs::SliceCopied;
 pub use crate::structs::StepBoundary;
 pub use crate::structs::StepByFn;
+pub use crate::structs::TakeSkipCyclic;
 pub use crate::structs::TupToRange;
 pub use crate::structs::TupToRangeIcv;
 pub use crate::structs::TupleImut;

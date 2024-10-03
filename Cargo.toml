@@ -54,6 +54,10 @@ harness = false
 name = "bench_scaling_value"
 harness = false
 
+[[bench]]
+name = "bench_take_skip_cyclic"
+harness = false
+
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]

@@ -1,8 +1,8 @@
 use crate::structs::{
     ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy, LastTaken,
     MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup, RangeToTup,
-    SkipStepBy, SliceCopied, StepBoundary, StepByFn, TupToRange, TupToRangeIcv, TupleImut,
-    TupleMut, UniqueSorted,
+    SkipStepBy, SliceCopied, StepBoundary, StepByFn, TakeSkipCyclic, TupToRange, TupToRangeIcv,
+    TupleImut, TupleMut, UniqueSorted,
 };
 use crate::swap;
 use crate::Debug;
@@ -784,6 +784,33 @@ pub trait IterExtd: Iterator {
             iter: self.fuse(),
             f,
             skip: 0,
+        }
+    }
+
+    /// An iterator that takes `n` and skips `m` iterator elements cyclically.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr: [u8; 13] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    /// let iter = arr.into_iter().take_skip_cyclic(3, 2);
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![1, 2, 3, 6, 7, 8, 11, 12, 13]);
+    /// ```
+    #[inline]
+    fn take_skip_cyclic(self, take: usize, skip: usize) -> TakeSkipCyclic<Self>
+    where
+        Self: Sized,
+    {
+        TakeSkipCyclic {
+            iter: self,
+            take,
+            skip: if take == 0 { usize::MAX } else { skip },
+            count: 0,
         }
     }
 
