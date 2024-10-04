@@ -6,7 +6,7 @@ use crate::{one, zero, Bounded, CheckedMul, CheckedSub, One, Zero};
 use crate::{Add, Div, Mul, Sub};
 use crate::{MinMax, NoElements, OneElement};
 
-/// Structure that stores data, parameters for the `scaling` iterator adapter.
+/// Structure that stores data, parameters for the [`scaling`](Scaler::scaling) iterator adapter.
 #[derive(Debug, Clone)]
 pub struct Scaling<I: Iterator, U, R> {
     denominator: U,
@@ -16,7 +16,6 @@ pub struct Scaling<I: Iterator, U, R> {
     iter: I,
     phantom: PhantomData<R>,
 }
-
 impl<I, U, R> Scaling<I, U, R>
 where
     I: Iterator + Clone,
@@ -119,7 +118,7 @@ where
 {
 }
 
-/// An `Iterator` that scales the values of the input iterator to the specified range.
+/// An iterator that scales the values of the input iterator to the specified range.
 pub trait Scaler<R>: Iterator
 where
     R: Bounded + Copy,

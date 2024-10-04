@@ -42,7 +42,7 @@ where
 /// This trait provides additional methods for working with iterators, enhancing their functionality.
 pub trait IterExtd: Iterator {
     /// An adapter that advances an iterator into a closure using its next method.
-    /// A mutable reference to another value can be used to store state between calls to the closure.
+    /// The mutable reference to `other` variable can be used to store state between calls to the closure.
     ///
     /// # Examples
     ///
@@ -63,12 +63,12 @@ pub trait IterExtd: Iterator {
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![&1, &2, &3, &4, &5, &10, &9, &8, &7, &6]);
     /// ```
-    fn adapter<T, F, B>(self, x: T, f: F) -> Adapter<Self, T, F>
+    fn adapter<T, F, B>(self, other: T, f: F) -> Adapter<Self, T, F>
     where
         Self: Sized,
         F: FnMut(&mut Self, &mut T) -> Option<B>,
     {
-        Adapter::new(self, x, f)
+        Adapter::new(self, other, f)
     }
 
     /// Returns an iterator over the N elements of the base iterator per iteration.
