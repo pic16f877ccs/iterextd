@@ -9,6 +9,56 @@ use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
 use num::{traits::FloatConst, Float, NumCast};
 
+/// Universal adapter for iterators.
+#[derive(Clone)]
+pub struct Adapter<I, T, F> {
+    iter_self: I,
+    other: T,
+    f: F,
+}
+
+impl<I, T, F> fmt::Debug for Adapter<I, T, F>
+where
+    I: fmt::Debug,
+    T: fmt::Debug,
+{
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_struct("Adapter")
+            .field("iter_self", &self.iter_self)
+            .field("other", &self.other)
+            .finish()
+    }
+}
+
+impl<I, T, F, B> Adapter<I, T, F>
+where
+    I: Iterator,
+    F: FnMut(&mut I, &mut T) -> Option<B>,
+{
+    /// Create a new [`Adapter`] struct.
+    #[inline]
+    pub fn new(iter_self: I, other: T, f: F) -> Adapter<I, T, F> {
+        Adapter {
+            iter_self,
+            other,
+            f,
+        }
+    }
+}
+
+impl<I, T, F, B> Iterator for Adapter<I, T, F>
+where
+    I: Iterator,
+    F: FnMut(&mut I, &mut T) -> Option<B>,
+{
+    type Item = B;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        (self.f)(&mut self.iter_self, &mut self.other)
+    }
+}
+
 /// An iterator that copies the array elements of the base iterator.
 #[derive(Debug, Clone)]
 pub struct ArrayCopied<I, const N: usize> {

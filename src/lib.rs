@@ -71,6 +71,7 @@ pub use crate::iterator::TupleIter;
 pub use crate::slice_modify_iter::GenRangeBounds;
 pub use crate::slice_modify_iter::SliceModify;
 pub use crate::slice_modify_iter::SliceModifyIter;
+pub use crate::structs::Adapter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
 pub use crate::structs::ArrayCopied;

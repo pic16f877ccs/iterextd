@@ -1,8 +1,8 @@
 use crate::structs::{
-    ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy, LastTaken,
-    MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup, RangeToTup,
-    SkipStepBy, SliceCopied, StepBoundary, StepByFn, TakeSkipCyclic, TupToRange, TupToRangeIcv,
-    TupleImut, TupleMut, UniqueSorted,
+    Adapter, ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy,
+    LastTaken, MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup,
+    RangeToTup, SkipStepBy, SliceCopied, StepBoundary, StepByFn, TakeSkipCyclic, TupToRange,
+    TupToRangeIcv, TupleImut, TupleMut, UniqueSorted,
 };
 use crate::swap;
 use crate::Debug;
@@ -41,6 +41,36 @@ where
 ///
 /// This trait provides additional methods for working with iterators, enhancing their functionality.
 pub trait IterExtd: Iterator {
+    /// An adapter that advances an iterator into a closure using its next method.
+    /// A mutable reference to another value can be used to store state between calls to the closure.
+    ///
+    /// # Examples
+    ///
+    /// Basic usage:
+    ///
+    /// ```
+    /// use iterextd::IterExtd;
+    ///
+    /// let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    /// let iter = arr.iter().adapter((0, arr.len()), |iter, (counter, len)| {
+    ///     if *counter < (*len / 2) {
+    ///         *counter += 1;
+    ///         iter.next()
+    ///     } else {
+    ///         iter.next_back()
+    ///     }
+    /// });
+    /// let vec = iter.collect::<Vec<_>>();
+    /// assert_eq!(vec, vec![&1, &2, &3, &4, &5, &10, &9, &8, &7, &6]);
+    /// ```
+    fn adapter<T, F, B>(self, x: T, f: F) -> Adapter<Self, T, F>
+    where
+        Self: Sized,
+        F: FnMut(&mut Self, &mut T) -> Option<B>,
+    {
+        Adapter::new(self, x, f)
+    }
+
     /// Returns an iterator over the N elements of the base iterator per iteration.
     ///
     /// # Panics
