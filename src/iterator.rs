@@ -1091,27 +1091,27 @@ impl<'a, T, const N: usize> Iterator for TupleMut<'a, T, N> {
     }
 }
 
-impl<'a, T, const N: usize> DoubleEndedIterator for TupleMut<'a, T, N> {
+impl<T, const N: usize> DoubleEndedIterator for TupleMut<'_, T, N> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         unsafe { self.arr[self.idx_iter.next_back()?].as_mut() }
     }
 }
 
-impl<'a, T, const N: usize> DoubleEndedIterator for TupleImut<'a, T, N> {
+impl<T, const N: usize> DoubleEndedIterator for TupleImut<'_, T, N> {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         Some(self.arr[self.idx_iter.next_back()?])
     }
 }
 
-impl<'a, T, const N: usize> ExactSizeIterator for TupleMut<'a, T, N> {
+impl<T, const N: usize> ExactSizeIterator for TupleMut<'_, T, N> {
     #[inline]
     fn len(&self) -> usize {
         self.idx_iter.len()
     }
 }
-impl<'a, T, const N: usize> ExactSizeIterator for TupleImut<'a, T, N> {
+impl<T, const N: usize> ExactSizeIterator for TupleImut<'_, T, N> {
     #[inline]
     fn len(&self) -> usize {
         self.idx_iter.len()
@@ -1223,7 +1223,7 @@ pub mod trait_itern {
                 {
                     type A = T;
                     type B = T;
-                    fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'_, Self::A, N> {
+                    fn tuple_itern<const N: usize>(&'a self) -> TupleImut<'a, Self::A, N> {
                         TupleImut {
                             arr: core::array::from_fn(|i| match i {
                                 $($n => &self.$n,)+
@@ -1233,7 +1233,7 @@ pub mod trait_itern {
                         }
                     }
 
-                    fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'_, Self::B, N> {
+                    fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'a, Self::B, N> {
                         TupleMut {
                             arr: core::array::from_fn(|i| match i {
                                 $($n => &mut self.$n as *mut T,)+
