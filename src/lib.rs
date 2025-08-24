@@ -6,6 +6,7 @@
 )]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg(target_pointer_width = "64")]
 
 //! Adapters that extend [`Iterator`] functionality.
 //!
