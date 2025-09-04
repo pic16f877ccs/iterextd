@@ -152,6 +152,6 @@ where
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         let idx = self.iter.next()?;
-        Some(unsafe { &mut (*self.ptr)[idx] })
+        Some(unsafe { &mut (&mut (*self.ptr))[idx] })
     }
 }
