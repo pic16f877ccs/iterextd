@@ -125,6 +125,43 @@ fn test_overlay_2d_panic_height_offset() {
 }
 
 #[test]
+#[should_panic(expected = "the offset and size of the inserted abstract 2D data exceed the bounds")]
+fn test_overlay_2d_panic_width_offset_overflow() {
+    let _ = (0..1).overlay_2d(0..1, (usize::MAX, 1), (1, 1), (usize::MAX, 0));
+}
+
+#[test]
+#[should_panic(expected = "the offset and size of the inserted abstract 2D data exceed the bounds")]
+fn test_overlay_2d_panic_height_offset_overflow() {
+    let _ = (0..1).overlay_2d(0..1, (1, usize::MAX), (1, 1), (0, usize::MAX));
+}
+
+#[test]
+#[should_panic(expected = "the size of abstract 2D data exceeds usize")]
+fn test_overlay_2d_panic_target_area_overflow() {
+    let _ = (0..1).overlay_2d(0..1, (usize::MAX, 2), (1, 1), (0, 0));
+}
+
+#[test]
+#[should_panic(expected = "the size of abstract 2D data exceeds usize")]
+fn test_overlay_2d_panic_full_width_area_overflow() {
+    let _ = (0..1).overlay_2d(0..1, (usize::MAX, 2), (usize::MAX, 2), (0, 0));
+}
+
+#[test]
+fn test_overlay_2d_maximum_representable_area() {
+    let result: Vec<_> = (0..3)
+        .overlay_2d(10..10, (usize::MAX, 1), (usize::MAX, 1), (0, 0))
+        .collect();
+    assert_eq!(result, vec![0, 1, 2]);
+
+    let result: Vec<_> = (0..3)
+        .overlay_2d(7..8, (usize::MAX, 1), (1, 1), (0, 0))
+        .collect();
+    assert_eq!(result, vec![7, 1, 2]);
+}
+
+#[test]
 #[should_panic(expected = "the size of abstract 2D data must not be zero")]
 fn test_overlay_2d_panic_size_height_zero() {
     let _ = (1..100).overlay_2d(
