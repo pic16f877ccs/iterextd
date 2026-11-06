@@ -52,6 +52,69 @@ fn test_collect_zeroed_arr() {
 }
 
 #[test]
+fn test_collect_zeroed_arr_counts_and_consumption() {
+    let mut empty = iter::empty::<u8>();
+    assert_eq!(empty.by_ref().collect_arr_zeroed::<3>(), (0, [0, 0, 0]));
+    assert_eq!(empty.next(), None);
+
+    let mut short = [1u8, 2].into_iter();
+    assert_eq!(short.by_ref().collect_arr_zeroed::<3>(), (2, [1, 2, 0]));
+    assert_eq!(short.next(), None);
+
+    let mut exact = [1u8, 2, 3].into_iter();
+    assert_eq!(exact.by_ref().collect_arr_zeroed::<3>(), (3, [1, 2, 3]));
+    assert_eq!(exact.next(), None);
+
+    let mut long = [1u8, 2, 3, 4, 5].into_iter();
+    assert_eq!(long.by_ref().collect_arr_zeroed::<3>(), (3, [1, 2, 3]));
+    assert_eq!(long.next(), Some(4));
+    assert_eq!(long.next(), Some(5));
+}
+
+#[test]
+fn test_collect_zeroed_arr_polls_infinite_iterator_only_to_capacity() {
+    let mut calls = 0u8;
+    let mut source = iter::from_fn(|| {
+        calls += 1;
+        Some(calls)
+    });
+
+    assert_eq!(source.by_ref().collect_arr_zeroed::<1>(), (1, [1]));
+    assert_eq!(source.by_ref().collect_arr_zeroed::<3>(), (3, [2, 3, 4]));
+    assert_eq!(source.next(), Some(5));
+}
+
+#[test]
+fn test_collect_zeroed_arr_stops_at_first_none() {
+    let mut calls = 0;
+    let mut source = iter::from_fn(|| {
+        calls += 1;
+        match calls {
+            1 => Some(7u8),
+            2 => None,
+            _ => Some(9),
+        }
+    });
+
+    assert_eq!(source.by_ref().collect_arr_zeroed::<3>(), (1, [7, 0, 0]));
+    assert_eq!(source.next(), Some(9));
+}
+
+#[test]
+fn test_collect_zeroed_arr_zero_capacity_does_not_poll() {
+    let calls = core::cell::Cell::new(0);
+    let source = iter::from_fn(|| {
+        calls.set(calls.get() + 1);
+        Some(1u8)
+    });
+
+    let result =
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.collect_arr_zeroed::<0>()));
+    assert!(result.is_err());
+    assert_eq!(calls.get(), 0);
+}
+
+#[test]
 #[ignore = "arr_zeroed_zero"]
 fn test_collect_zeroed_arr_non_zero() {
     let test_ui = TestCases::new();
