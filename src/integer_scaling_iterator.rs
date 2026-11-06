@@ -216,7 +216,7 @@ where
 }
 
 pub(crate) mod convert_by_add {
-    use std::ops::{RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive};
+    use core::ops::{RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive};
     pub trait FromByAddAll<T> {
         fn from_by_add_all(n: T) -> Self
         where
