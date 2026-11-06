@@ -35,7 +35,8 @@ pub trait Iter2D: Iterator {
     /// * `overlay_offset` - Offset (x, y) in the base area where the overlay region should be inserted.
     ///
     /// # Panics
-    /// Panics if the overlay region does not fit within the target area or if any size is zero.
+    /// Panics if the overlay region does not fit within the target area, if any size
+    /// is zero, or if the target area cannot be represented as a `usize`.
     ///
     /// # Returns
     /// Returns an `Overlay2D` iterator that yields elements from the base iterator,
@@ -78,8 +79,6 @@ pub trait Iter2D: Iterator {
         Self: Sized + Iterator<Item = T>,
         J: Iterator<Item = T>,
     {
-        let overlay_right_edge = overlay_offset.0 + overlay_size.0;
-
         if (target_size.0 == 0)
             || (target_size.1 == 0)
             || (overlay_size.0 == 0)
@@ -88,12 +87,27 @@ pub trait Iter2D: Iterator {
             panic!("the size of abstract 2D data must not be zero");
         }
 
-        if overlay_right_edge > target_size.0 || (overlay_offset.1 + overlay_size.1) > target_size.1
+        let overlay_right_edge = overlay_offset.0.checked_add(overlay_size.0);
+        let overlay_bottom_edge = overlay_offset.1.checked_add(overlay_size.1);
+        if overlay_right_edge.map_or(true, |edge| edge > target_size.0)
+            || overlay_bottom_edge.map_or(true, |edge| edge > target_size.1)
         {
             panic!("the offset and size of the inserted abstract 2D data exceed the bounds");
         }
+        let total_target = target_size
+            .0
+            .checked_mul(target_size.1)
+            .expect("the size of abstract 2D data exceeds usize");
 
-        let overlay_start_index = target_size.0 * overlay_offset.1 + overlay_offset.0;
+        let overlay_start_index = target_size
+            .0
+            .checked_mul(overlay_offset.1)
+            .and_then(|row| row.checked_add(overlay_offset.0))
+            .expect("overlay start index exceeds usize");
+        let total_overlay = overlay_size
+            .0
+            .checked_mul(overlay_size.1)
+            .expect("the size of abstract 2D data exceeds usize");
 
         Overlay2D {
             base_iter: self,
@@ -101,16 +115,20 @@ pub trait Iter2D: Iterator {
             base_index: 0,
             overlay_index: overlay_start_index,
             overlay_row_width: if target_size.0 == overlay_size.0 {
-                overlay_size.0 * overlay_size.1
+                total_overlay
             } else {
                 overlay_size.0
             },
             overlay_row_padding: if target_size.0 == overlay_size.0 {
-                let total_target = target_size.0 * target_size.1;
-                let total_overlay = overlay_size.0 * overlay_size.1;
-                total_target - (total_overlay + overlay_start_index)
+                total_target
+                    .checked_sub(
+                        total_overlay
+                            .checked_add(overlay_start_index)
+                            .expect("overlay end index exceeds usize"),
+                    )
+                    .expect("overlay end index exceeds target area")
             } else {
-                overlay_offset.0 + (target_size.0 - overlay_right_edge)
+                target_size.0 - overlay_size.0
             },
             in_overlay_row: false,
         }
@@ -143,18 +161,23 @@ where
     fn next(&mut self) -> Option<T> {
         let iter_item = self.base_iter.next();
 
+        // usize::MAX marks the end of the overlay; it is not a valid target index.
+        if self.overlay_index == usize::MAX {
+            return iter_item;
+        }
+
         if self.base_index == self.overlay_index {
             if self.in_overlay_row {
                 self.in_overlay_row = false;
-                self.overlay_index += self.overlay_row_padding;
+                self.overlay_index = self.overlay_index.saturating_add(self.overlay_row_padding);
             } else {
                 self.in_overlay_row = true;
-                self.base_index += self.overlay_row_width;
+                self.base_index = self.base_index.saturating_add(self.overlay_row_width);
             }
         }
 
         if self.base_index > self.overlay_index {
-            self.overlay_index += 1;
+            self.overlay_index = self.overlay_index.saturating_add(1);
             let iter_other_item = self.overlay_iter.next();
             if iter_other_item.is_none() || iter_item.is_none() {
                 self.overlay_index = usize::MAX;
@@ -162,7 +185,7 @@ where
             }
             return iter_other_item;
         } else {
-            self.base_index += 1;
+            self.base_index = self.base_index.saturating_add(1);
         }
 
         iter_item
