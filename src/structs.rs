@@ -829,11 +829,11 @@ impl<I, T> ExactSizeIterator for RangeIcvToTup<I> where
 
 /// Iterator adapter with skip and step capabilities in one.
 #[derive(Debug, Clone)]
-pub struct SkipStepBy<I> {
-    pub(crate) iter: Fuse<I>,
-    pub(crate) skip: usize,
-    pub(crate) step: usize,
-}
+    pub struct SkipStepBy<I> {
+        pub(crate) iter: Fuse<I>,
+        pub(crate) skip: usize,
+        pub(crate) step: usize,
+    }
 
 impl<I> Iterator for SkipStepBy<I>
 where
@@ -851,11 +851,13 @@ where
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
+
         let div = |x: usize| {
-            if x == 0 {
+            let remaining = x.saturating_sub(self.skip);
+            if remaining == 0 {
                 0
             } else {
-                (1 + (x - 1) / (self.step + 1)).saturating_sub(self.skip)
+                1 + (remaining - 1) / (self.step + 1)
             }
         };
 

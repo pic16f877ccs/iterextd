@@ -494,6 +494,60 @@ fn test_skip_step_size_hint() {
 }
 
 #[test]
+fn test_skip_step_size_hint_and_len_after_advancing() {
+    for len in 0..=12 {
+        for skip in 0..=14 {
+            for step in [1, 2, 3, 7, usize::MAX] {
+                let mut actual = (0..len).skip_step_by(skip, step);
+                let mut expected = (0..len).skip(skip).step_by(step);
+
+                loop {
+                    let remaining = expected.clone().count();
+                    assert_eq!(
+                        actual.size_hint(),
+                        (remaining, Some(remaining)),
+                        "len={len}, skip={skip}, step={step}"
+                    );
+                    assert_eq!(actual.len(), remaining, "len={len}, skip={skip}, step={step}");
+                    let next = actual.next();
+                    assert_eq!(next, expected.next(), "len={len}, skip={skip}, step={step}");
+                    if next.is_none() {
+                        assert_eq!(actual.size_hint(), (0, Some(0)));
+                        assert_eq!(actual.len(), 0);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn test_skip_step_size_hint_with_non_exact_input() {
+    for skip in 0..=12 {
+        for step in [1, 2, 3, 7, usize::MAX] {
+            let mut actual = (0..10).filter(|x| x % 2 == 0).skip_step_by(skip, step);
+            let mut expected = (0..10).filter(|x| x % 2 == 0).skip(skip).step_by(step);
+
+            loop {
+                let remaining = expected.clone().count();
+                let (lower, upper) = actual.size_hint();
+                assert!(lower <= remaining, "skip={skip}, step={step}");
+                assert!(
+                    upper.map_or(true, |upper| remaining <= upper),
+                    "skip={skip}, step={step}"
+                );
+                let next = actual.next();
+                assert_eq!(next, expected.next(), "skip={skip}, step={step}");
+                if next.is_none() {
+                    break;
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn test_skip_step_count() {
     let iter_left = (0..10).skip_step_by(5, 1);
     let iter_right = (0..10).skip(5).step_by(1);
