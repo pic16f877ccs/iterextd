@@ -141,7 +141,10 @@ pub trait IterExtd: Iterator {
         ArrayCopied::new(self)
     }
 
-    /// Collect a zeroed array for nullable types.
+    /// Collect up to `N` elements into a zeroed array for nullable types.
+    ///
+    /// Returns the number of elements collected and the array. Elements not filled by
+    /// the iterator remain zeroed. No more than `N` elements are consumed.
     ///
     /// # Panics
     ///
@@ -165,17 +168,14 @@ pub trait IterExtd: Iterator {
         Self::Item: AllowZero,
     {
         assert!(N != 0, "array size must be non-zero");
-        let mut index = 0;
+        let mut count = 0;
         let mut arr: [Self::Item; N] = unsafe { MaybeUninit::zeroed().assume_init() };
-        for (idx, elem) in self.enumerate() {
-            if idx == N {
-                break;
-            }
-            arr[idx] = elem;
-            index = idx;
+        for (slot, elem) in arr.iter_mut().zip(self) {
+            *slot = elem;
+            count += 1;
         }
 
-        (index + 1, arr)
+        (count, arr)
     }
 
     /// Create an array from an iterator.
