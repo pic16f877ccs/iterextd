@@ -17,6 +17,7 @@ pub struct Adapter<I, T, F> {
     f: F,
 }
 
+#[allow(clippy::missing_fields_in_debug)] // Preserve the established Debug output.
 impl<I, T, F> fmt::Debug for Adapter<I, T, F>
 where
     I: fmt::Debug,
@@ -37,8 +38,8 @@ where
 {
     /// Create a new [`Adapter`] struct.
     #[inline]
-    pub fn new(iter_self: I, other: T, f: F) -> Adapter<I, T, F> {
-        Adapter {
+    pub const fn new(iter_self: I, other: T, f: F) -> Self {
+        Self {
             iter_self,
             other,
             f,
@@ -67,15 +68,15 @@ pub struct ArrayCopied<I, const N: usize> {
 
 impl<I, const N: usize> ArrayCopied<I, N> {
     #[inline]
-    pub(super) fn new(iter: I) -> ArrayCopied<I, N> {
-        ArrayCopied { iter }
+    pub(super) const fn new(iter: I) -> Self {
+        Self { iter }
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> Iterator for ArrayCopied<I, N>
+impl<'a, I, T, const N: usize> Iterator for ArrayCopied<I, N>
 where
     I: Iterator<Item = [&'a T; N]>,
-    T: Copy,
+    T: Copy + 'a,
 {
     type Item = [T; N];
 
@@ -85,10 +86,10 @@ where
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> ExactSizeIterator for ArrayCopied<I, N>
+impl<'a, I, T, const N: usize> ExactSizeIterator for ArrayCopied<I, N>
 where
     I: ExactSizeIterator<Item = [&'a T; N]>,
-    T: Copy,
+    T: Copy + 'a,
 {
     #[inline]
     fn len(&self) -> usize {
@@ -96,10 +97,10 @@ where
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> FusedIterator for ArrayCopied<I, N>
+impl<'a, I, T, const N: usize> FusedIterator for ArrayCopied<I, N>
 where
     I: FusedIterator<Item = [&'a T; N]>,
-    T: Copy,
+    T: Copy + 'a,
 {
 }
 
@@ -111,28 +112,28 @@ pub struct ArrayCloned<I, const N: usize> {
 
 impl<I, const N: usize> ArrayCloned<I, N> {
     #[inline]
-    pub(super) fn new(iter: I) -> ArrayCloned<I, N> {
-        ArrayCloned { iter }
+    pub(super) const fn new(iter: I) -> Self {
+        Self { iter }
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> Iterator for ArrayCloned<I, N>
+impl<'a, I, T, const N: usize> Iterator for ArrayCloned<I, N>
 where
     I: Iterator<Item = [&'a T; N]>,
-    T: Clone,
+    T: Clone + 'a,
 {
     type Item = [T; N];
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        Some(self.iter.next()?.map(|elem| elem.clone()))
+        Some(self.iter.next()?.map(Clone::clone))
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> ExactSizeIterator for ArrayCloned<I, N>
+impl<'a, I, T, const N: usize> ExactSizeIterator for ArrayCloned<I, N>
 where
     I: ExactSizeIterator<Item = [&'a T; N]>,
-    T: Clone,
+    T: Clone + 'a,
 {
     #[inline]
     fn len(&self) -> usize {
@@ -140,10 +141,10 @@ where
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> FusedIterator for ArrayCloned<I, N>
+impl<'a, I, T, const N: usize> FusedIterator for ArrayCloned<I, N>
 where
     I: FusedIterator<Item = [&'a T; N]>,
-    T: Clone,
+    T: Clone + 'a,
 {
 }
 
@@ -165,18 +166,12 @@ where
         let mut idx = 0;
 
         loop {
-            if let Some(elem) = self.iter.next() {
-                if idx == N - 1 {
-                    arr[idx] = MaybeUninit::new(elem);
-                    break Some(unsafe { arr.map(|e| e.assume_init()) });
-                } else {
-                    arr[idx] = MaybeUninit::new(elem);
-                    idx += 1;
-                    continue;
-                }
-            } else {
-                return None;
+            let elem = self.iter.next()?;
+            arr[idx] = MaybeUninit::new(elem);
+            if idx == N - 1 {
+                break Some(unsafe { arr.map(|e| e.assume_init()) });
             }
+            idx += 1;
         }
     }
 
@@ -281,6 +276,11 @@ where
     /// * `radius` - radius of the generated circle points.
     /// * `num_points` - sets the number of points.
     ///
+    /// # Panics
+    ///
+    /// Panics if `T` cannot represent the number of points or the constants used
+    /// in the calculation.
+    ///
     /// # Examples
     ///
     /// Basic usage:
@@ -345,8 +345,8 @@ pub struct StepBoundary<I> {
 
 impl<I: Iterator> StepBoundary<I> {
     #[inline]
-    pub(super) fn new(iter: I, size: usize) -> StepBoundary<I> {
-        StepBoundary { iter, size }
+    pub(super) const fn new(iter: I, size: usize) -> Self {
+        Self { iter, size }
     }
 }
 
@@ -445,8 +445,8 @@ where
 
 impl<I: Iterator> InclusiveStepBy<I> {
     #[inline]
-    pub(super) fn new(iter: I, step: usize) -> InclusiveStepBy<I> {
-        InclusiveStepBy {
+    pub(super) const fn new(iter: I, step: usize) -> Self {
+        Self {
             iter,
             firs_step: true,
             step,
@@ -477,8 +477,8 @@ where
 
 impl<I, F> MapByThree<I, F> {
     #[inline]
-    pub(super) fn new(iter: I, f: F) -> MapByThree<I, F> {
-        MapByThree { iter, f }
+    pub(super) const fn new(iter: I, f: F) -> Self {
+        Self { iter, f }
     }
 }
 
@@ -525,8 +525,8 @@ where
 
 impl<I, F> MapByTwo<I, F> {
     #[inline]
-    pub(super) fn new(iter: I, f: F) -> MapByTwo<I, F> {
-        MapByTwo { iter, f }
+    pub(super) const fn new(iter: I, f: F) -> Self {
+        Self { iter, f }
     }
 }
 
@@ -578,8 +578,8 @@ where
     F: FnMut(&mut I, &mut K) -> Option<B>,
 {
     #[inline]
-    pub(super) fn new(iter_self: I, iter_other: K, f: F) -> MapIters<I, K, F> {
-        MapIters {
+    pub(super) const fn new(iter_self: I, iter_other: K, f: F) -> Self {
+        Self {
             iter_self,
             iter_other,
             f,
@@ -612,7 +612,7 @@ pub struct MissingIntegers<I> {
 impl<I> MissingIntegers<I> {
     #[inline]
     pub(crate) fn default() -> Self {
-        MissingIntegers {
+        Self {
             iter: FixedBitSet::new().into_ones(),
             min: 0,
             _phantom: PhantomData,
@@ -647,15 +647,15 @@ pub struct LastTaken<I: Iterator> {
 
 impl<I: Iterator> LastTaken<I> {
     #[inline]
-    pub(super) fn new(iter: I, item: Option<I::Item>) -> LastTaken<I> {
-        LastTaken { iter, item }
+    pub(super) const fn new(iter: I, item: Option<I::Item>) -> Self {
+        Self { iter, item }
     }
 }
 
 impl<I: Iterator> LastTaken<I> {
     /// Returns the iterator element of the last iteration.
     ///
-    /// Using the LastTaken iterator adapter, you can get the value of
+    /// Using the `LastTaken` iterator adapter, you can get the value of
     /// the last iteration of the iterator without moving the iterator.
     ///
     /// # Examples
@@ -671,7 +671,7 @@ impl<I: Iterator> LastTaken<I> {
     /// assert_eq!(Some(66), iter.last_item().copied());
     /// ```
     #[inline]
-    pub fn last_item(&self) -> Option<&I::Item> {
+    pub const fn last_item(&self) -> Option<&I::Item> {
         self.item.as_ref()
     }
 }
@@ -703,6 +703,7 @@ where
 
 /// The iterator adapter that offsets the points.
 #[derive(Debug, Clone)]
+#[allow(clippy::struct_field_names)] // Preserve the established Debug field names.
 pub struct Offset<T, I> {
     pub(crate) iter: I,
     pub(crate) offset_x: T,
@@ -741,8 +742,8 @@ where
     I::Item: Clone,
 {
     #[inline]
-    pub(super) fn new(iter: I, item: I::Item) -> Previous<I> {
-        Previous { iter, item }
+    pub(super) const fn new(iter: I, item: I::Item) -> Self {
+        Self { iter, item }
     }
 }
 
@@ -913,15 +914,15 @@ pub struct SliceCopied<I, const N: usize> {
 
 impl<I, const N: usize> SliceCopied<I, N> {
     #[inline]
-    pub(super) fn new(iter: I) -> SliceCopied<I, N> {
-        SliceCopied { iter }
+    pub(super) const fn new(iter: I) -> Self {
+        Self { iter }
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> Iterator for SliceCopied<I, N>
+impl<'a, I, T, const N: usize> Iterator for SliceCopied<I, N>
 where
     I: Iterator<Item = &'a [T]>,
-    T: Copy,
+    T: Copy + 'a,
 {
     type Item = [T; N];
 
@@ -931,10 +932,10 @@ where
     }
 }
 
-impl<'a, I, T: 'a, const N: usize> ExactSizeIterator for SliceCopied<I, N>
+impl<'a, I, T, const N: usize> ExactSizeIterator for SliceCopied<I, N>
 where
     I: Iterator<Item = &'a [T]>,
-    T: Copy,
+    T: Copy + 'a,
 {
 }
 
@@ -1045,7 +1046,7 @@ where
     assert!(slice.len() == N, "slice must be equal to array");
     let mut arr = MaybeUninit::<[T; N]>::uninit();
     unsafe {
-        ptr::copy(slice.as_ptr(), arr.as_mut_ptr() as *mut T, N);
+        ptr::copy(slice.as_ptr(), arr.as_mut_ptr().cast::<T>(), N);
         arr.assume_init()
     }
 }
@@ -1075,7 +1076,7 @@ pub struct UniqueSorted<I> {
 impl<I> UniqueSorted<I> {
     #[inline]
     pub(crate) fn default() -> Self {
-        UniqueSorted {
+        Self {
             iter: FixedBitSet::new().into_ones(),
             min: 0,
             _phantom: PhantomData,
