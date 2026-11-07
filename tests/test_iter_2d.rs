@@ -23,12 +23,12 @@ fn test_overlay_2d() {
             (6, 6),  // source size
             (2, 2),  // offsets
         )
-        .cloned()
+        .copied()
         .collect::<Vec<_>>();
     assert_eq!(res_vec, (1..=80).collect::<Vec<_>>());
 
     let cloned_vec = vec.clone();
-    let cloned_other_vec = other_vec.clone();
+    let cloned_other_vec = other_vec;
     let res_vec = cloned_vec
         .into_iter()
         .overlay_2d(
@@ -43,7 +43,7 @@ fn test_overlay_2d() {
     let res_vec = vec
         .into_iter()
         .overlay_2d(
-            other_vec.iter().cloned(), // other data
+            other_vec.iter().copied(), // other data
             (10, 10),                  // target size
             (6, 6),                    // source size
             (2, 2),                    // offsets
@@ -231,24 +231,24 @@ fn test_overlay_2d_panic_width_zero_other() {
 fn test_overlay_2d_overlay_iter_longer_than_overlay_size() {
     let base = vec![0; 9];
     let overlay = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-    let result: Vec<_> = base
+    let result = base
         .into_iter()
         .overlay_2d(overlay.into_iter(), (3, 3), (2, 2), (1, 1))
-        .collect();
+        .count();
 
-    assert_eq!(result.len(), 9);
+    assert_eq!(result, 9);
 }
 
 #[test]
 fn test_overlay_2d_overlay_iter_shorter_than_overlay_size() {
     let base = vec![0; 9];
     let overlay = vec![1, 2];
-    let result: Vec<_> = base
+    let result = base
         .into_iter()
         .overlay_2d(overlay.into_iter(), (3, 3), (2, 2), (1, 1))
-        .collect();
+        .count();
 
-    assert_eq!(result.len(), 9);
+    assert_eq!(result, 9);
 }
 
 #[test]
@@ -354,5 +354,5 @@ fn test_overlay_2d_debug() {
     let debug_str = "Overlay2D { base_iter: 1..=100, overlay_iter: 1..=64, \
         base_index: 0, overlay_index: 11, overlay_row_width: 8, \
         overlay_row_padding: 2, in_overlay_row: false }";  
-    assert_eq!(format!("{:?}", iter), debug_str);
+    assert_eq!(format!("{iter:?}"), debug_str);
 }

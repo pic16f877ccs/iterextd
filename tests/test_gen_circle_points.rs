@@ -5,7 +5,7 @@ use iterextd::GenCirclePoints;
 fn test_gen_circle_points_debug_f32() {
     let iter = GenCirclePoints::new(1.0_f32, 0);
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "GenCirclePoints { radius: 1.0, num_points: 0, \
             base_cos: 1.0, base_sin: 0.0, incr_cos: NaN, incr_sin: NaN }"
     );
@@ -48,9 +48,9 @@ fn test_gen_circle_points_three_points_f32() {
     let cos_0_deg = 1.0e0_f32;
     let sin_0_deg = 0.0e0_f32;
     let cos_120_deg = -0.5e0_f32;
-    let sin_120_deg = 0.8660254037844386_f32;
+    let sin_120_deg = 0.866_025_4_f32;
     let cos_240_deg = -0.5e0_f32;
-    let sin_240_deg = -0.8660254037844386_f32;
+    let sin_240_deg = -0.866_025_4_f32;
     assert_relative_eq!(vec[0].0, cos_0_deg, epsilon = 1.0e-8);
     assert_relative_eq!(vec[0].1, sin_0_deg, epsilon = 1.0e-8);
     assert_relative_eq!(vec[1].0, cos_120_deg, epsilon = 2.0e-7);
@@ -64,9 +64,9 @@ fn test_gen_circle_points_points_f32() {
     let num_points = 739;
     let mut iter = GenCirclePoints::new(1.0_f32, num_points);
     let (cos, sin) = iter.nth(num_points - 1).unwrap();
-    let rhs_cos = 0.9999638558306818_f32;
+    let rhs_cos = 0.999_963_9_f32;
     assert_relative_eq!(cos, rhs_cos, epsilon = 2.0e-7);
-    let rhs_sin = -0.00850217808772121_f32;
+    let rhs_sin = -0.008_502_178_f32;
     assert_relative_eq!(sin, rhs_sin, epsilon = 2.0e-7);
 }
 
@@ -74,7 +74,7 @@ fn test_gen_circle_points_points_f32() {
 fn test_gen_circle_points_debug() {
     let iter = GenCirclePoints::new(1.0_f64, 0);
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "GenCirclePoints { radius: 1.0, num_points: 0, \
             base_cos: 1.0, base_sin: 0.0, incr_cos: NaN, incr_sin: NaN }"
     );
@@ -117,9 +117,9 @@ fn test_gen_circle_points_three_points() {
     let cos_0_deg = 1.0e0_f64;
     let sin_0_deg = 0.0e0_f64;
     let cos_120_deg = -0.5e0_f64;
-    let sin_120_deg = 0.8660254037844386_f64;
+    let sin_120_deg = 0.866_025_403_784_438_6_f64;
     let cos_240_deg = -0.5e0_f64;
-    let sin_240_deg = -0.8660254037844386_f64;
+    let sin_240_deg = -0.866_025_403_784_438_6_f64;
     assert_relative_eq!(vec[0].0, cos_0_deg, epsilon = 1.0e-16);
     assert_relative_eq!(vec[0].1, sin_0_deg, epsilon = 1.0e-16);
     assert_relative_eq!(vec[1].0, cos_120_deg, epsilon = 4.0e-16);
@@ -133,8 +133,8 @@ fn test_gen_circle_points_points() {
     let num_points = 739;
     let mut iter = GenCirclePoints::new(1.0_f64, num_points);
     let (cos, sin) = iter.nth(num_points - 1).unwrap();
-    let rhs_cos = 0.9999638558306818_f64;
+    let rhs_cos = 0.999_963_855_830_681_8_f64;
     assert_relative_eq!(cos, rhs_cos, epsilon = 9.0e-16);
-    let rhs_sin = -0.00850217808772121_f64;
+    let rhs_sin = -0.008_502_178_087_721_21_f64;
     assert_relative_eq!(sin, rhs_sin, epsilon = 9.0e-16);
 }

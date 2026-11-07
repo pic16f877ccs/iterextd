@@ -92,7 +92,7 @@ where
     }
 }
 
-/// An iterator that allows creating RangeInclusive slice boundaries.
+/// An iterator that allows creating `RangeInclusive` slice boundaries.
 #[derive(Debug, Clone)]
 pub struct GenRangeBounds {
     iter: StepBoundary<Range<usize>>,

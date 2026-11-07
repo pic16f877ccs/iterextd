@@ -136,7 +136,7 @@ fn test_collect_zeroed_arr_ref() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "array size must be non-zero")]
 #[ignore = "arr_zeroed_const"]
 fn test_collect_zeroed_arr_const_zero() {
     let data = vec![1010, 2020, 3030].into_iter();
@@ -166,23 +166,23 @@ fn test_array_chunks() {
     let vec = iter.arr_chunks().collect::<Vec<[&u16; 1]>>();
     assert_eq!(vec, Vec::<[&u16; 1]>::new());
 
-    let vec = vec!["one", "two", "three"];
+    let vec = ["one", "two", "three"];
     let iter = vec.iter().arr_chunks::<2>();
     let iter_cloned = iter.clone();
     let vec_left = iter.collect::<Vec<_>>();
     let vec_right = iter_cloned.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
 
-    let vec = vec!["one"];
+    let vec = ["one"];
     let iter = vec.iter().arr_chunks::<1>();
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "ArrChunks { iter: Iter([\"one\"]) }".to_string()
     );
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "chunk size must be non-zero")]
 #[ignore = "arr_chunks_const"]
 fn test_arr_chunks_const_zero() {
     let data = vec![10.10_f32, 20.20, 30.30].into_iter();
@@ -284,14 +284,14 @@ fn test_collect_array() {
     let coll_arr: [_; 3] = iter_by_ref.collect_array();
     assert_eq!(coll_arr, [&1u8, &2, &3]);
 
-    let arr = vec![vec![1u8, 2], vec![9, 10]];
+    let arr = [vec![1u8, 2], vec![9, 10]];
     let iter = arr.iter();
     let coll_arr: [_; 2] = iter.collect_array();
     assert_eq!(coll_arr, [&vec![1u8, 2], &vec![9, 10]]);
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "chunk size must be non-zero")]
 #[ignore = "arr_collect_const"]
 fn test_collect_array_const_zero() {
     let data = vec![100, 200, 300].into_iter();
@@ -299,7 +299,7 @@ fn test_collect_array_const_zero() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
 #[ignore = "arr_collect_const"]
 fn test_collect_array_uninit() {
     let data = vec![100, 200, 300].into_iter();
@@ -314,23 +314,23 @@ fn test_comb_two_iters() {
     let other_iter = other_list.iter();
 
     let combined = basic_iter.clone().combine_iters(1, other_iter.clone(), 3);
-    let vec = combined.cloned().collect::<Vec<_>>();
+    let vec = combined.copied().collect::<Vec<_>>();
     assert_eq!(vec, [0u8, 10, 11, 12, 1, 13, 14, 15, 2, 16, 17, 18, 3, 19]);
 
     let combined = basic_iter.clone().combine_iters(1, other_iter.clone(), 0);
-    let vec = combined.cloned().collect::<Vec<_>>();
+    let vec = combined.copied().collect::<Vec<_>>();
     assert_eq!(vec, [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
     let combined = basic_iter.clone().combine_iters(10, other_iter.clone(), 0);
-    let vec = combined.cloned().collect::<Vec<_>>();
+    let vec = combined.copied().collect::<Vec<_>>();
     assert_eq!(vec, [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
     let combined = basic_iter.clone().combine_iters(11, other_iter.clone(), 0);
-    let vec = combined.cloned().collect::<Vec<_>>();
+    let vec = combined.copied().collect::<Vec<_>>();
     assert_eq!(vec, [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
-    let vec_self = vec!["one", "two", "three"];
-    let vec_other = vec!["first", "second", "third", "fourth"];
+    let vec_self = ["one", "two", "three"];
+    let vec_other = ["first", "second", "third", "fourth"];
     let iter_other = vec_other.iter();
     let iter = vec_self.iter().combine_iters(2, iter_other, 2);
     let iter_cloned = iter.clone();
@@ -339,9 +339,9 @@ fn test_comb_two_iters() {
     assert_eq!(vec_left, vec_right);
 
     let len = 4;
-    let vec_self = vec!["one", "two", "three"];
+    let vec_self = ["one", "two", "three"];
     let iter_self = vec_self.iter();
-    let vec_other = vec!["first", "second", "third", "fourth"];
+    let vec_other = ["first", "second", "third", "fourth"];
     let iter_other = vec_other.iter();
     let vec_left = iter_self
         .combine_iters(0, iter_other.clone(), len)
@@ -351,9 +351,9 @@ fn test_comb_two_iters() {
     assert_eq!(vec_left, vec_right);
 
     let len = 5;
-    let vec_self = vec!["one", "two", "three"];
+    let vec_self = ["one", "two", "three"];
     let iter_self = vec_self.iter();
-    let vec_other = vec!["first", "second", "third", "fourth"];
+    let vec_other = ["first", "second", "third", "fourth"];
     let iter_other = vec_other.iter();
     let vec_left = iter_self
         .combine_iters(0, iter_other.clone(), len)
@@ -362,9 +362,9 @@ fn test_comb_two_iters() {
     assert_ne!(vec_left.len(), len);
     assert_eq!(vec_left, vec_right);
 
-    let vec_self = vec!["one", "two", "three"];
+    let vec_self = ["one", "two", "three"];
     let iter_self = vec_self.iter();
-    let vec_other = vec!["first", "second", "third", "fourth"];
+    let vec_other = ["first", "second", "third", "fourth"];
     let iter_other = vec_other.iter();
     let vec_left = iter_self
         .clone()
@@ -373,10 +373,10 @@ fn test_comb_two_iters() {
     let vec_right = iter_self.collect::<Vec<_>>();
     assert_eq!(vec_left, vec_right);
 
-    let vec_one = vec!["one"];
-    let vec_two = vec!["two"];
+    let vec_one = ["one"];
+    let vec_two = ["two"];
     let iter = vec_one.iter().combine_iters(1, vec_two.iter(), 1);
-    assert_eq!(format!("{:?}", iter),
+    assert_eq!(format!("{iter:?}"),
     "CombineIters { self_iter: Iter([\"one\"]), self_part_len: 1, self_counter: 0, other_iter: Iter([\"two\"]), other_part_len: 1, other_counter: 1 }".to_string());
 
     let vec_one: Vec<u8> = vec![];
@@ -387,7 +387,7 @@ fn test_comb_two_iters() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "one of repeats  must be non-zero")]
 #[ignore = "comb_two_iters_two_val_zero"]
 fn test_comb_two_iters_values_zero() {
     let basic_list = [0u8, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -399,17 +399,17 @@ fn test_comb_two_iters_values_zero() {
 
 #[test]
 fn test_copied() {
-    let vec = vec![0, 10, 27, 38, 49, 50];
+    let vec = [0, 10, 27, 38, 49, 50];
     let iter = vec.iter().arr_chunks().array_copied();
     let vec_copied = iter.collect::<Vec<_>>();
     assert_eq!(vec_copied, vec![[0, 10], [27, 38], [49, 50]]);
 
-    let vec = vec![&0usize, &10, &27, &38, &49, &50];
+    let vec = [&0usize, &10, &27, &38, &49, &50];
     let iter = vec.iter().arr_chunks().array_copied().array_copied();
     let vec_copied = iter.collect::<Vec<_>>();
     assert_eq!(vec_copied, vec![[0usize, 10, 27], [38, 49, 50]]);
 
-    let vec = vec!["usize", "isize", "float", "typle", "struct", "enum"];
+    let vec = ["usize", "isize", "float", "typle", "struct", "enum"];
     let iter = vec.iter().arr_chunks().array_copied();
     let vec_copied = iter.collect::<Vec<_>>();
     assert_eq!(
@@ -430,7 +430,7 @@ fn test_copied() {
     let vec: Vec<char> = vec!['c'];
     let iter = vec.iter().arr_chunks::<1>().array_copied();
     assert_eq!(
-        &format!("{:?}", iter),
+        &format!("{iter:?}"),
         "ArrayCopied { iter: ArrChunks { iter: Iter(['c']) } }"
     );
 
@@ -445,17 +445,17 @@ fn test_copied() {
 
 #[test]
 fn test_cloned() {
-    let vec = vec![0, 10, 27, 38, 49, 50];
+    let vec = [0, 10, 27, 38, 49, 50];
     let iter = vec.iter().arr_chunks().array_cloned();
     let vec_cloned = iter.collect::<Vec<_>>();
     assert_eq!(vec_cloned, vec![[0, 10], [27, 38], [49, 50]]);
 
-    let vec = vec![&0usize, &10, &27, &38, &49, &50];
+    let vec = [&0usize, &10, &27, &38, &49, &50];
     let iter = vec.iter().arr_chunks().array_cloned().array_cloned();
     let vec_cloned = iter.collect::<Vec<_>>();
     assert_eq!(vec_cloned, vec![[0usize, 10, 27], [38, 49, 50]]);
 
-    let vec = vec!["usize", "isize", "float", "typle", "struct", "enum"];
+    let vec = ["usize", "isize", "float", "typle", "struct", "enum"];
     let iter = vec.iter().arr_chunks().array_cloned();
     let vec_cloned = iter.collect::<Vec<_>>();
     assert_eq!(
@@ -473,7 +473,7 @@ fn test_cloned() {
     let vec_cloned = iter.collect::<Vec<_>>();
     assert_eq!(vec_cloned, vec![['c', 'l', 'o'], ['n', 'e', 'd']]);
 
-    let vec = vec![vec!["usize"], vec!["isize"], vec!["float"], vec!["typle"]];
+    let vec = [vec!["usize"], vec!["isize"], vec!["float"], vec!["typle"]];
     let iter = vec.iter().arr_chunks().array_cloned();
     let vec_cloned = iter.collect::<Vec<_>>();
     assert_eq!(
@@ -487,11 +487,11 @@ fn test_cloned() {
     let vec: Vec<char> = vec!['c'];
     let iter = vec.iter().arr_chunks::<1>().array_cloned();
     assert_eq!(
-        &format!("{:?}", iter),
+        &format!("{iter:?}"),
         "ArrayCloned { iter: ArrChunks { iter: Iter(['c']) } }"
     );
 
-    let vec = vec![vec!["usize"], vec!["isize"], vec!["float"], vec!["typle"]];
+    let vec = [vec!["usize"], vec!["isize"], vec!["float"], vec!["typle"]];
     let iter_left = vec.iter().arr_chunks::<2>().array_cloned();
     let iter_right = iter_left.clone();
     let vec_cloned_left = iter_left.collect::<Vec<_>>();
@@ -505,11 +505,11 @@ fn test_skip_step_by() {
     let iter = vec.iter();
 
     let iter_cloned = iter.clone().skip_step_by(2, 3);
-    let vec = iter_cloned.cloned().collect::<Vec<_>>();
+    let vec = iter_cloned.copied().collect::<Vec<_>>();
     assert_eq!(vec, vec![22, 55, 88]);
 
     let iter_cloned = iter.clone().skip_step_by(0, 3);
-    let vec = iter_cloned.cloned().collect::<Vec<_>>();
+    let vec = iter_cloned.copied().collect::<Vec<_>>();
     assert_eq!(vec, vec![10, 33, 66, 99]);
 
     let vec_l = (0..11).step_by(1).collect::<Vec<_>>();
@@ -527,7 +527,7 @@ fn test_skip_step_by() {
     let vec: Vec<char> = vec!['a', 'b', 'c', 'd'];
     let iter = vec.iter().skip_step_by(1, 2);
     assert_eq!(
-        &format!("{:?}", iter),
+        &format!("{iter:?}"),
         "SkipStepBy { iter: Fuse { iter: Some(Iter(['a', 'b', 'c', 'd'])) }, skip: 1, step: 1 }"
     );
 
@@ -631,7 +631,7 @@ fn test_skip_step_count() {
     assert_eq!(iter.count(), 0);
 
     let iter_left = (0..6).filter(|x| x % 2 == 0).skip_step_by(0, 2);
-    let iter_right = (0..6).filter(|x| x % 2 == 0).skip(0).step_by(2);
+    let iter_right = (0..6).filter(|x| x % 2 == 0).step_by(2);
     assert_eq!(iter_left.count(), iter_right.count());
 
     let iter = iter::empty::<i32>().skip_step_by(2, 2);
@@ -639,11 +639,11 @@ fn test_skip_step_count() {
 }
 
 #[test]
-#[should_panic]
 #[ignore = "skip_step_zero"]
 fn test_skip_step_by_step_zero() {
     let arr = [10u8, 11, 22, 33, 44, 55, 66, 77, 88, 99];
-    let _iter = arr.iter().skip_step_by(5, 0);
+    let result = arr.iter().skip_step_by(5, 0).copied().collect::<Vec<_>>();
+    assert_eq!(result, [55, 66, 77, 88, 99]);
 }
 
 #[test]
@@ -765,7 +765,7 @@ fn test_slice_copied() {
     let arr_of_slices = [&arr[0..2], &arr[2..4], &arr[4..6]];
     let iter = arr_of_slices.into_iter().slice_copied::<2>();
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "SliceCopied { iter: IntoIter([[0, 1], [2, 3], [4, 5]]) }".to_string()
     );
 
@@ -779,7 +779,7 @@ fn test_slice_copied() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "slice must be equal to array")]
 #[ignore = "slice_copied_eq_lens"]
 fn test_slice_copied_eq_lens() {
     let arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -875,7 +875,7 @@ fn test_map_by_two() {
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(vec, vec![("by".to_string(), "map".to_string())]);
 
-    let vec = vec!["map".to_string(), "by".to_string(), "two".to_string()];
+    let vec = ["map".to_string(), "by".to_string(), "two".to_string()];
     let iter = vec.iter().map_by_two(|a, b| (b, a));
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(vec, vec![(&"by".to_string(), &"map".to_string())]);
@@ -900,7 +900,7 @@ fn test_map_by_two() {
     let vec_left = iter.collect::<Vec<_>>();
     assert_eq!(vec_left, vec![]);
 
-    let vec = vec!["one", "two", "three"];
+    let vec = ["one", "two", "three"];
     let iter = vec.iter().map_by_two(|a, b| (b, a));
     let iter_cloned = iter.clone();
     let vec_left = iter.collect::<Vec<_>>();
@@ -923,7 +923,7 @@ fn test_map_by_three() {
         vec![("three".to_string(), "by".to_string(), "map".to_string())]
     );
 
-    let vec = vec!["map".to_string(), "by".to_string(), "three".to_string()];
+    let vec = ["map".to_string(), "by".to_string(), "three".to_string()];
     let iter = vec.iter().map_by_three(|a, b, c| (c, b, a));
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(
@@ -941,7 +941,7 @@ fn test_map_by_three() {
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(vec, vec![]);
 
-    let vec = vec!["one", "two", "three"];
+    let vec = ["one", "two", "three"];
     let iter = vec.iter().map_by_three(|a, b, c| (c, b, a));
     let iter_cloned = iter.clone();
     let vec_left = iter.collect::<Vec<_>>();
@@ -952,7 +952,7 @@ fn test_map_by_three() {
 #[test]
 fn test_consume() {
     let mut arr = [1, 2, 3];
-    let _ = arr
+    let () = arr
         .iter_mut()
         .map(|elem| {
             *elem *= 10;
@@ -1201,7 +1201,7 @@ fn test_to_range() {
 fn test_to_range_icv() {
     let arr_tup = [(0, 2), (3, 5), (6, 8), (7, 9), (10, 12)];
 
-    let iter = arr_tup.iter().cloned().to_range_icv();
+    let iter = arr_tup.iter().copied().to_range_icv();
     assert_eq!(iter.len(), 5);
     let vec_cloned = iter.clone().collect::<Vec<_>>();
     let vec = iter.collect::<Vec<_>>();
@@ -1252,6 +1252,6 @@ fn test_offset_empty_debug() {
     assert_eq!(vec, vec![]);
     let arr_tup = [(10, 20)];
     let iter = arr_tup.into_iter().offset(10, 10);
-    assert_eq!(format!("{:?}", iter),
+    assert_eq!(format!("{iter:?}"),
     "Offset { iter: IntoIter([(10, 20)]), offset_x: 10, offset_y: 10 }");
 }

@@ -7,7 +7,7 @@ fn bench_create_bresenham_circle(c: &mut Criterion) {
             for elem in black_box(CircleBresenhamSeq::new(2500_u16).offset(2500_i32, 2500_i32)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 

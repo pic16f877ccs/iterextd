@@ -11,7 +11,7 @@ mod tests {
         let arr = &[9i8, -8, -8, -5, -4, -3, -2, 0, 1, 2, 4, 5, 6, 8, 10];
         assert_eq!(arr.iter().missing_integers().collect::<Vec<_>>(), vec![-7, -6, -1, 3, 7]);
 
-        let vec = vec![-3, 3];
+        let vec = [-3, 3];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![-2, -1, 0, 1, 2]);
 
         let a = isize::MAX as i128;
@@ -19,10 +19,10 @@ mod tests {
         let c = a - 3;
         let d = a + 1;
 
-        let vec = vec![a, b, c];
+        let vec = [a, b, c];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![a - 2]);
 
-        let vec = vec![a, b, c, d];
+        let vec = [a, b, c, d];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![]);
 
         let vec = vec![4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 8];
@@ -45,13 +45,13 @@ mod tests {
         let c = a - 3;
         let d = a + 1;
 
-        let vec = vec![a, b, c];
+        let vec = [a, b, c];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![a - 2]);
 
-        let vec = vec![a, b, c, d];
+        let vec = [a, b, c, d];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![]);
 
-        let vec = vec![8, 8, 8, 8, 8];
+        let vec = [8, 8, 8, 8, 8];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![]);
         let vec = vec![4u16, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 7, 7, 8];
         assert_eq!(vec.iter().missing_integers().collect::<Vec<_>>(), vec![]);
@@ -65,12 +65,12 @@ mod tests {
 
     #[test]
     fn test_missing_int_uqsort() {
-        let mut vec = vec![];
+        let mut vec = [];
         vec.sort_unstable();
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<i8>>(), vec![]);
 
-        let mut vec = vec![3];
+        let mut vec = [3];
         vec.sort_unstable();
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<_>>(), vec![]);
@@ -80,7 +80,7 @@ mod tests {
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<_>>(), vec![-7, -6, -1, 3, 7]);
 
-        let mut vec = vec![-3, 3];
+        let mut vec = [-3, 3];
         vec.sort_unstable();
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<_>>(), vec![-2, -1, 0, 1, 2]);
@@ -95,7 +95,7 @@ mod tests {
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<_>>(), vec![1, 6, 7]);
 
-        let mut vec = vec![8usize, 8, 8, 8, 8];
+        let mut vec = [8usize, 8, 8, 8, 8];
         vec.sort_unstable();
         let iter = vec.iter().unique();
         assert_eq!(iter.missing_integers_uqsort().collect::<Vec<_>>(), vec![]);

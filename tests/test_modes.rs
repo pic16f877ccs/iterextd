@@ -16,7 +16,7 @@ mod tests {
         let modes: Vec<_> = vec.into_iter().modes().collect();
         assert_eq!(modes, vec![('c', 3)]);
 
-        let vec = vec!["10", "20", "20", "30", "30", "30"];
+        let vec = ["10", "20", "20", "30", "30", "30"];
         let modes: Vec<_> = vec.iter().modes().collect();
         assert_eq!(modes, vec![(&"30", 3)]);
 
@@ -26,6 +26,6 @@ mod tests {
 
         let arr = [1];
         let mode = arr.into_iter().modes();
-        assert_eq!(format!("Mode: {:?}", mode), "Mode: Filter { iter: [(1, 1)] }");
+        assert_eq!(format!("Mode: {mode:?}"), "Mode: Filter { iter: [(1, 1)] }");
     }
 }

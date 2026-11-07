@@ -9,7 +9,7 @@ fn test_create_bresenham_circle_empty() {
 
 #[test]
 fn test_create_bresenham_circle_r_two_clone() {
-    let circle = CircleBresenhamSeq::<i64>::new(1_u32).clone();
+    let circle = CircleBresenhamSeq::<i64>::new(1_u32);
     let vec = circle.collect::<Vec<_>>();
     assert_eq!(
         vec,
@@ -20,7 +20,7 @@ fn test_create_bresenham_circle_r_two_clone() {
 #[test]
 fn test_create_bresenham_circle_two_debug() {
     let circle = CircleBresenhamSeq::<i32>::new(2_u16);
-    assert_eq!(format!("{:?}", circle), "CircleBresenhamSeq { x: -2, y: 0, err: -2, i: 1 }");
+    assert_eq!(format!("{circle:?}"), "CircleBresenhamSeq { x: -2, y: 0, err: -2, i: 1 }");
 }
 
 #[test]

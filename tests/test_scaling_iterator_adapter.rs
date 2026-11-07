@@ -6,6 +6,7 @@ macro_rules! test_scaling_unsigned_type {
         ( $tmp_type:ty, $input_type:ty; $($output_type:ty),* ) => {
             $(
                 paste! {
+                    #[allow(clippy::cast_possible_truncation)]
                     #[test]
                     fn [<test_uintermediate_$input_type _$tmp_type _$output_type _to_otput_type_hall_size>]() {
                         let iter = [<$input_type>::MIN, (<$tmp_type>::MAX / 2) as $input_type]
@@ -14,7 +15,8 @@ macro_rules! test_scaling_unsigned_type {
                         assert_eq!(vec, vec![<$output_type>::MIN, <$output_type>::MIN + 2]);
                     }
                     #[test]
-                    #[should_panic]
+                    #[allow(clippy::cast_possible_truncation)]
+                    #[should_panic(expected = "overflow of the selected intermediate type")]
                     fn [<test_uintermediate_$input_type _$tmp_type _$output_type _to_otput_type_err>]() {
                         let _iter = [<$input_type>::MIN, (<$tmp_type>::MAX / 2 + 1) as $input_type]
                             .into_iter().scaling::<$tmp_type>(<$output_type>::MIN..=<$output_type>::MIN + 2);
@@ -44,7 +46,7 @@ macro_rules! test_scaling_type {
 fn test_scaling_debug() {
     let iter = [0u8, 1, 2].into_iter().scaling::<u16>(0..=25u8);
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "Scaling { denominator: 2, numerator: 25, input_start: 0, \
         output_start: 0, iter: IntoIter([0, 1, 2]), phantom: PhantomData<u8> }"
     );
@@ -60,118 +62,117 @@ fn test_scaling_empty() {
 
 #[test]
 fn test_scaling_one_element_min_val_offset() {
-    let iter = [i8::MIN].into_iter().scaling::<u16>(255..=255u8);
+    let iter = std::iter::once(i8::MIN).scaling::<u16>(255..=255u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![255u8]);
 
-    let iter = [i8::MIN].into_iter().scaling::<u16>(5..=255u8);
+    let iter = std::iter::once(i8::MIN).scaling::<u16>(5..=255u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![5u8]);
 
-    let iter = [i8::MIN].into_iter().scaling::<u16>(0..=255u8);
+    let iter = std::iter::once(i8::MIN).scaling::<u16>(0..=255u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![0u8]);
 
-    let iter = [i8::MIN].into_iter().scaling::<u16>(i8::MIN..=i8::MIN);
+    let iter = std::iter::once(i8::MIN).scaling::<u16>(i8::MIN..=i8::MIN);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i8::MIN]);
 
-    let iter = [i16::MIN].into_iter().scaling::<u16>(-5..=5i8);
+    let iter = std::iter::once(i16::MIN).scaling::<u16>(-5..=5i8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![-5i8]);
 
-    let iter = [i16::MIN].into_iter().scaling::<u32>(u16::MAX..=u16::MAX);
+    let iter = std::iter::once(i16::MIN).scaling::<u32>(u16::MAX..=u16::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![u16::MAX]);
 
-    let iter = [i16::MIN].into_iter().scaling::<u16>(i8::MIN..=i8::MAX);
+    let iter = std::iter::once(i16::MIN).scaling::<u16>(i8::MIN..=i8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i8::MIN]);
 
-    let iter = [i16::MIN].into_iter().scaling::<u16>(0..=i8::MAX);
+    let iter = std::iter::once(i16::MIN).scaling::<u16>(0..=i8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![0]);
 }
 
 #[test]
 fn test_scaling_one_element_zero() {
-    let iter = [0u8].into_iter().scaling::<u16>(0..=0u8);
+    let iter = std::iter::once(0u8).scaling::<u16>(0..=0u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![0u8]);
 
-    let iter = [0u8].into_iter().scaling::<u16>(5..=255u8);
+    let iter = std::iter::once(0u8).scaling::<u16>(5..=255u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![5u8]);
 
-    let iter = [0u8].into_iter().scaling::<u32>(5..=u16::MAX);
+    let iter = std::iter::once(0u8).scaling::<u32>(5..=u16::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![5u16]);
 
-    let iter = [0u16].into_iter().scaling::<u16>(5..=255u8);
+    let iter = std::iter::once(0u16).scaling::<u16>(5..=255u8);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![5u8]);
 
-    let iter = [0i8].into_iter().scaling::<u32>(256..=u16::MAX);
+    let iter = std::iter::once(0i8).scaling::<u32>(256..=u16::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![u16::MAX]);
 
-    let iter = [0i16].into_iter().scaling::<u64>(255..=255u16);
+    let iter = std::iter::once(0i16).scaling::<u64>(255..=255u16);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![255]);
 
-    let iter = [0i8].into_iter().scaling::<u32>(-500..=i16::MAX);
+    let iter = std::iter::once(0i8).scaling::<u32>(-500..=i16::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i16::MAX]);
 
-    let iter = [0i32].into_iter().scaling::<u64>(255..=255u16);
+    let iter = std::iter::once(0i32).scaling::<u64>(255..=255u16);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![255]);
 }
 
 #[test]
 fn test_scaling_one_elements_bounds() {
-    let iter = [0u8].into_iter().scaling::<u32>(..u8::MAX);
+    let iter = std::iter::once(0u8).scaling::<u32>(..u8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![0u8]);
 
-    let iter = [i8::MAX].into_iter().scaling::<u16>(..=i8::MAX);
+    let iter = std::iter::once(i8::MAX).scaling::<u16>(..=i8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i8::MAX]);
 
-    let iter = [i8::MAX].into_iter().scaling::<u16>(..=u8::MAX);
+    let iter = std::iter::once(i8::MAX).scaling::<u16>(..=u8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![u8::MAX]);
 
-    let iter = [i8::MIN].into_iter().scaling::<u16>(..=i8::MAX);
+    let iter = std::iter::once(i8::MIN).scaling::<u16>(..=i8::MAX);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i8::MIN]);
 
-    let iter = [i8::MAX].into_iter().scaling::<u16>(0i8..);
+    let iter = std::iter::once(i8::MAX).scaling::<u16>(0i8..);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![i8::MAX]);
 
-    let iter = [0u8].into_iter().scaling::<u32>(10u8..);
+    let iter = std::iter::once(0u8).scaling::<u32>(10u8..);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![10u8]);
 
-    let iter = [i8::MAX].into_iter().scaling::<u16>(..);
+    let iter = std::iter::once(i8::MAX).scaling::<u16>(..);
     let result = iter.collect::<Vec<i8>>();
     assert_eq!(result, vec![i8::MAX]);
 
-    let iter = [0u8].into_iter().scaling::<u32>(..);
+    let iter = std::iter::once(0u8).scaling::<u32>(..);
     let result = iter.collect::<Vec<u8>>();
     assert_eq!(result, vec![0u8]);
 
-    let iter = [0u8].into_iter().scaling::<u16>(0..);
+    let iter = std::iter::once(0u8).scaling::<u16>(0..);
     let result = iter.collect::<Vec<i8>>();
     assert_eq!(result, vec![0i8]);
 
-    let iter = [u16::MAX].into_iter().scaling::<u32>(0..);
+    let iter = std::iter::once(u16::MAX).scaling::<u32>(0..);
     let result = iter.collect::<Vec<i16>>();
     assert_eq!(result, vec![i16::MAX]);
 
-    let iter = [u32::MAX as usize]
-        .into_iter()
+    let iter = std::iter::once(u32::MAX as usize)
         .scaling::<usize>(0..=u32::MAX as usize + 2);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![u32::MAX as usize + 2]);
@@ -224,14 +225,14 @@ fn test_scaling_range_tup_in_out() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "lower range bound must be less than upper")]
 fn test_scaling_range_in_out_panic() {
     let in_range = i8::MIN..=i8::MAX;
-    let _iter = in_range.scaling::<u16>(i8::MAX..=i8::MIN);
+    let _iter = in_range.scaling::<u16>((i8::MAX, i8::MIN));
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "lower range bound must be less than upper")]
 fn test_scaling_range_tup_in_panic() {
     let in_range = i8::MIN..=i8::MAX;
     let _iter = in_range.scaling::<u16>((i8::MAX, i8::MIN));
@@ -266,13 +267,13 @@ fn test_scaling_ranges_in_out() {
     let in_range = u8::MIN..=u8::MAX;
     let iter = in_range.clone().scaling::<u16>(i8::MIN..);
     let result_in_range = in_range.collect::<Vec<_>>();
-    let result_out_range = iter.map(|x| u8::from_by_add(x)).collect::<Vec<_>>();
+    let result_out_range = iter.map(u8::from_by_add).collect::<Vec<_>>();
     assert_eq!(result_in_range, result_out_range);
 
     let in_range = u8::MIN..=u8::MAX;
     let iter = in_range.clone().scaling::<u16>(u8::MIN..);
     let result_in_range = in_range.collect::<Vec<_>>();
-    let result_out_range = iter.map(|x| u8::from_by_add(x)).collect::<Vec<_>>();
+    let result_out_range = iter.map(u8::from_by_add).collect::<Vec<_>>();
     assert_eq!(result_in_range, result_out_range);
 
     let in_range = i16::MIN..=i16::MAX;

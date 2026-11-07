@@ -185,16 +185,12 @@ fn test_tuple_iterator_n_mut_enum_mutate() {
         *mut_ref = TestEnum::VariantB(99);
     }
 
-    if let Some(mut_ref) = tup_iter.next() {
-        if let TestEnum::VariantB(value) = mut_ref {
-            *value += 1;
-        }
+    if let Some(TestEnum::VariantB(value)) = tup_iter.next() {
+        *value += 1;
     }
 
-    if let Some(mut_ref) = tup_iter.next() {
-        if let TestEnum::VariantC(string) = mut_ref {
-            string.push_str("_modified");
-        }
+    if let Some(TestEnum::VariantC(string)) = tup_iter.next() {
+        string.push_str("_modified");
     }
 
     assert_eq!(
@@ -510,7 +506,7 @@ fn test_tuple_itern_6() {
     let tup = (0.0f64, 1.0, 2.0, 3.0, 4.0, 5.0);
     let mut iter = tup.tuple_itern::<6>().copied();
     for i in 0..6 {
-        assert_eq!(iter.next(), Some(i as f64));
+        assert_eq!(iter.next(), Some(f64::from(i)));
     }
     assert_eq!(iter.next(), None);
 }
@@ -682,8 +678,8 @@ fn test_tuple_itern_elems() {
     assert_eq!(tup.tuple_itern::<10>().collect::<Vec<_>>(), vec10);
     let vec11 = iter.clone().take(11).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern::<11>().collect::<Vec<_>>(), vec11);
-    let vec12 = iter.clone().take(12).collect::<Vec<_>>();
-    assert_eq!(tup.tuple_itern::<12>().collect::<Vec<_>>(), vec12);
+    let vec_twelve = iter.clone().take(12).collect::<Vec<_>>();
+    assert_eq!(tup.tuple_itern::<12>().collect::<Vec<_>>(), vec_twelve);
 }
 
 #[test]
@@ -713,6 +709,9 @@ fn test_tuple_mut_itern_elems() {
     assert_eq!(tup.tuple_itern_mut::<10>().collect::<Vec<&mut i32>>(), vec10);
     let vec11 = iter.clone().take(11).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern_mut::<11>().collect::<Vec<&mut i32>>(), vec11);
-    let vec12 = iter.clone().take(12).collect::<Vec<_>>();
-    assert_eq!(tup.tuple_itern_mut::<12>().collect::<Vec<&mut i32>>(), vec12);
+    let vec_twelve = iter.clone().take(12).collect::<Vec<_>>();
+    assert_eq!(
+        tup.tuple_itern_mut::<12>().collect::<Vec<&mut i32>>(),
+        vec_twelve
+    );
 }

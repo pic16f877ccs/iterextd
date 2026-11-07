@@ -9,7 +9,7 @@ fn extrapolate_half_step(c: &mut Criterion) {
             for elem in black_box([1.0, 1.5]).into_iter().extrapolate().take(black_box(1024)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -20,7 +20,7 @@ fn extrapolate(c: &mut Criterion) {
             for elem in black_box([1, 2]).into_iter().extrapolate().take(black_box(1024)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -31,7 +31,7 @@ fn std_range(c: &mut Criterion) {
             for elem in black_box(1..1024) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -42,7 +42,7 @@ fn extrapolate_with_step_two(c: &mut Criterion) {
             for elem in black_box([1, 3]).into_iter().extrapolate().take(black_box(1024)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -53,7 +53,7 @@ fn std_range_with_step_two(c: &mut Criterion) {
             for elem in black_box(1..2049).step_by(black_box(2)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -64,7 +64,7 @@ fn extrapolate_with_chain(c: &mut Criterion) {
             for elem in black_box([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).into_iter().extrapolate().take(black_box(1024)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -75,7 +75,7 @@ fn std_range_with_chain(c: &mut Criterion) {
             for elem in black_box([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).into_iter().chain(black_box(11..1025)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -86,7 +86,7 @@ fn extrapolate_with_chain_step_two(c: &mut Criterion) {
             for elem in black_box([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]).into_iter().extrapolate().take(black_box(1024)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -97,7 +97,7 @@ fn std_range_with_chain_step_two(c: &mut Criterion) {
             for elem in black_box([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12]).into_iter().chain(black_box(14..2039).step_by(black_box(2))) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 

@@ -70,19 +70,10 @@ fn test_slice_modify_iter() {
     let iter = arr.gen_range_bounds(size);
     let logic = |e: &mut [&str]| {
         let len = e.len();
-        if len == size {
-            let idx = len - 1;
-            let one = e[0];
-            e[0] = e[idx];
-            e[idx] = one;
-        } else {
-            let idx = len - 1;
-            let one = e[0];
-            e[0] = e[idx];
-            e[idx] = one;
-        }
+        let idx = len - 1;
+        e.swap(0, idx);
     };
-    let _ = arr.modify_slice(iter, logic);
+    let () = arr.modify_slice(iter, logic);
     assert_eq!(
         arr,
         ["with", "Slice", "modifier", "iterator", "An", ".", "index", "bounds", "external"]
@@ -103,7 +94,7 @@ fn test_slice_modify_iter() {
         "bounds".to_string(),
         ".".to_string(),
     ];
-    let _ = arr.modify_slice(iter, |s| s.swap_with_slice(&mut sl[idx.next().unwrap()]));
+    let () = arr.modify_slice(iter, |s| s.swap_with_slice(&mut sl[idx.next().unwrap()]));
     assert_eq!(
         arr,
         [

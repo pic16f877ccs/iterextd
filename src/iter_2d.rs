@@ -1,6 +1,6 @@
 use crate::FusedIterator;
 
-impl<T: ?Sized> Iter2D for T where T: Iterator {}
+impl<T: Iterator + ?Sized> Iter2D for T {}
 
 impl<I, J, T> FusedIterator for Overlay2D<I, J, T>
 where
@@ -184,9 +184,8 @@ where
                 return iter_item;
             }
             return iter_other_item;
-        } else {
-            self.base_index = self.base_index.saturating_add(1);
         }
+        self.base_index = self.base_index.saturating_add(1);
 
         iter_item
     }

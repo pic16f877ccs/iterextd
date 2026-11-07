@@ -7,7 +7,7 @@ fn bench_scaling_value_types_u32_u32_u32(c: &mut Criterion) {
             for elem in black_box((u32::MIN..=1024u32).scaling::<u32>(u32::MIN..=1024u32)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -19,7 +19,7 @@ fn bench_scaling_value_types_u32_u32_i32(c: &mut Criterion) {
             {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -31,7 +31,7 @@ fn bench_scaling_value_types_i32_u32_i32(c: &mut Criterion) {
             {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -42,7 +42,7 @@ fn bench_scaling_value_types_u32_u32_u32_new(c: &mut Criterion) {
             for elem in black_box(iter.clone()) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -53,7 +53,7 @@ fn bench_scaling_value_types_u32_u32_i32_new(c: &mut Criterion) {
             for elem in black_box(iter.clone()) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -64,7 +64,7 @@ fn bench_scaling_value_types_i32_u32_i32_new(c: &mut Criterion) {
             for elem in black_box(iter.clone()) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 

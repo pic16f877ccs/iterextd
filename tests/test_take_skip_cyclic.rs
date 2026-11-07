@@ -80,7 +80,7 @@ fn test_take_skip_cyclic_debug() {
     let arr: [u8; 0] = [];
     let iter = arr.iter().take_skip_cyclic(3, 2);
     assert_eq!(
-        format!("{:?}", iter),
+        format!("{iter:?}"),
         "TakeSkipCyclic { iter: Iter([]), take: 3, skip: 2, count: 0 }"
     );
 }

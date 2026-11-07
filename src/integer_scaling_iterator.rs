@@ -32,7 +32,7 @@ where
     R: Bounded + Copy,
 {
     #[inline]
-    pub(crate) fn new(iter: I, output_range: impl convert_by_add::RangeBoundsInner<R>) -> Self {
+    pub(crate) fn new(iter: I, output_range: &impl convert_by_add::RangeBoundsInner<R>) -> Self {
         let output_start = U::try_from_by_add(match output_range.start_bound() {
             convert_by_add::BoundInner::Included(&start) => start,
             convert_by_add::BoundInner::Unbounded => <R>::min_value(),
@@ -111,12 +111,7 @@ where
     }
 }
 
-impl<T: ?Sized, R> Scaler<R> for T
-where
-    T: Iterator,
-    R: Bounded + Copy,
-{
-}
+impl<T: Iterator + ?Sized, R> Scaler<R> for T where R: Bounded + Copy {}
 
 /// An iterator that scales the values of the input iterator to the specified range.
 pub trait Scaler<R>: Iterator
@@ -160,7 +155,7 @@ where
             + Copy,
         Self: Sized + Clone,
     {
-        Scaling::new(self, output_range)
+        Scaling::new(self, &output_range)
     }
 }
 
@@ -215,7 +210,14 @@ where
     }
 }
 
-pub(crate) mod convert_by_add {
+// These casts implement the width-specific and wrapping conversions of this module.
+#[allow(
+    clippy::cast_lossless,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_possible_wrap
+)]
+pub mod convert_by_add {
     use core::ops::{RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive};
     pub trait FromByAddAll<T> {
         fn from_by_add_all(n: T) -> Self

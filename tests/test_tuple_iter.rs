@@ -186,16 +186,12 @@ fn test_tuple_iterator_mut_enum_mutate() {
         *mut_ref = TestEnum::VariantB(99);
     }
 
-    if let Some(mut_ref) = tup_iter.next() {
-        if let TestEnum::VariantB(value) = mut_ref {
-            *value += 1;
-        }
+    if let Some(TestEnum::VariantB(value)) = tup_iter.next() {
+        *value += 1;
     }
 
-    if let Some(mut_ref) = tup_iter.next() {
-        if let TestEnum::VariantC(string) = mut_ref {
-            string.push_str("_modified");
-        }
+    if let Some(TestEnum::VariantC(string)) = tup_iter.next() {
+        string.push_str("_modified");
     }
 
     assert_eq!(
@@ -553,7 +549,7 @@ fn test_tuple_iter_6() {
     let tup = (0.0f64, 1.0, 2.0, 3.0, 4.0, 5.0);
     let mut iter = tup.tuple_iter().copied();
     for i in 0..6 {
-        assert_eq!(iter.next(), Some(i as f64));
+        assert_eq!(iter.next(), Some(f64::from(i)));
     }
     assert_eq!(iter.next(), None);
 }

@@ -7,7 +7,7 @@ fn bench_create_circle_points_f32(c: &mut Criterion) {
             for elem in black_box(GenCirclePoints::new(5.0_f32, 1034)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -17,7 +17,7 @@ fn bench_create_circle_points_f64(c: &mut Criterion) {
             for elem in black_box(GenCirclePoints::new(5.0_f64, 1034)) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 

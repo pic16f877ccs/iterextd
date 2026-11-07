@@ -5,7 +5,7 @@ fn test_tuple_into_iter() {
     let tup = (1, 2, 3, 4, 5, 6, 7, 8);
     let vec = tup.tuple_into_iter().collect::<Vec<_>>();
     assert_eq!(vec, [1, 2, 3, 4, 5, 6, 7, 8,]);
-    println!("{:?}", tup);
+    println!("{tup:?}");
 }
 
 #[test]

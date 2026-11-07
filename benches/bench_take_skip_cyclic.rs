@@ -7,7 +7,7 @@ fn bench_take_skip_cyclic(c: &mut Criterion) {
             for elem in black_box(0..1024).take_skip_cyclic(1, 1) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 
@@ -17,7 +17,7 @@ fn bench_std_step(c: &mut Criterion) {
             for elem in black_box(0..1024).step_by(2) {
                 black_box(elem);
             }
-        })
+        });
     });
 }
 

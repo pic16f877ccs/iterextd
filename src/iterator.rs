@@ -23,7 +23,7 @@ use crate::Hash;
 #[cfg(feature = "std")]
 use crate::HashMap;
 
-impl<T: ?Sized> IterExtd for T where T: Iterator {}
+impl<T: Iterator + ?Sized> IterExtd for T {}
 
 impl<I, const N: usize> FusedIterator for ArrChunks<I, N> where I: FusedIterator {}
 
@@ -164,7 +164,7 @@ pub trait IterExtd: Iterator {
     /// ```
     fn collect_arr_zeroed<const N: usize>(self) -> (usize, [Self::Item; N])
     where
-        Self: Sized + Iterator,
+        Self: Sized,
         Self::Item: AllowZero,
     {
         assert!(N != 0, "array size must be non-zero");
@@ -198,7 +198,7 @@ pub trait IterExtd: Iterator {
     /// ```
     fn collect_array<const N: usize>(self) -> [<Self as Iterator>::Item; N]
     where
-        Self: Sized + Iterator,
+        Self: Sized,
     {
         assert!(N != 0, "chunk size must be non-zero");
         self.arr_chunks::<N>().next().unwrap()
@@ -520,7 +520,7 @@ pub trait IterExtd: Iterator {
     /// ```
     fn missing_integers(mut self) -> MissingIntegers<Self>
     where
-        Self: Iterator + Sized + Clone,
+        Self: Sized + Clone,
         <Self as Iterator>::Item: PartialOrd + Deref,
         <<Self as Iterator>::Item as Deref>::Target: Copy,
         usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
@@ -541,17 +541,14 @@ pub trait IterExtd: Iterator {
         bitset.toggle_range(..);
 
         match self.try_for_each(|x| {
-            if let Some(val) = <usize as TryFromByAdd<
-                <<Self as Iterator>::Item as Deref>::Target,
-            >>::try_from_by_add(*x)
-            {
+            <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(
+                *x,
+            )
+            .map(|val| {
                 bitset.remove(val - min);
-                Some(())
-            } else {
-                None
-            }
+            })
         }) {
-            Some(_) => MissingIntegers {
+            Some(()) => MissingIntegers {
                 iter: bitset.into_ones(),
                 min,
                 _phantom: PhantomData,
@@ -580,7 +577,7 @@ pub trait IterExtd: Iterator {
     ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item>
            + Debug
     where
-        Self: Iterator + Sized + Clone + Debug,
+        Self: Sized + Clone + Debug,
         <Self as Iterator>::Item: PartialOrd + Deref + Debug,
         <<Self as Iterator>::Item as Deref>::Target:
             Copy + Debug + ToZero<<<Self as Iterator>::Item as Deref>::Target>,
@@ -601,9 +598,8 @@ pub trait IterExtd: Iterator {
                 if range_val >= **seq_it.peek()? {
                     seq_it.next();
                     continue;
-                } else {
-                    return Some(range_val);
-                };
+                }
+                return Some(range_val);
             }
             None
         })
@@ -669,7 +665,7 @@ pub trait IterExtd: Iterator {
     #[inline]
     fn offset<T>(self, offset_x: T, offset_y: T) -> Offset<T, Self>
     where
-        Self: Sized + Iterator,
+        Self: Sized,
     {
         Offset {
             iter: self,
@@ -844,7 +840,7 @@ pub trait IterExtd: Iterator {
         }
     }
 
-    /// Return an iterator that converts a tuple at each iteration to a [RangeInclusive](crate::RangeInclusive).
+    /// Return an iterator that converts a tuple at each iteration to a [`RangeInclusive`](crate::RangeInclusive).
     ///
     /// # Examples
     ///
@@ -907,7 +903,7 @@ pub trait IterExtd: Iterator {
         RangeToTup { iter: self }
     }
 
-    /// Return an iterator that converts a [RangeInclusive](crate::RangeInclusive) at each iteration to a tuple.
+    /// Return an iterator that converts a [`RangeInclusive`](crate::RangeInclusive) at each iteration to a tuple.
     ///
     /// # Examples
     ///
@@ -943,7 +939,7 @@ pub trait IterExtd: Iterator {
     /// ```
     fn unique_sorted(mut self) -> UniqueSorted<Self>
     where
-        Self: Iterator + Sized + Clone,
+        Self: Sized + Clone,
         <Self as Iterator>::Item: PartialOrd + Deref,
         <<Self as Iterator>::Item as Deref>::Target: Copy,
         usize: TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>,
@@ -963,17 +959,14 @@ pub trait IterExtd: Iterator {
         let mut bitset = FixedBitSet::with_capacity(size);
 
         match self.try_for_each(|x| {
-            if let Some(val) = <usize as TryFromByAdd<
-                <<Self as Iterator>::Item as Deref>::Target,
-            >>::try_from_by_add(*x)
-            {
+            <usize as TryFromByAdd<<<Self as Iterator>::Item as Deref>::Target>>::try_from_by_add(
+                *x,
+            )
+            .map(|val| {
                 bitset.insert(val - min);
-                Some(())
-            } else {
-                None
-            }
+            })
         }) {
-            Some(_) => UniqueSorted {
+            Some(()) => UniqueSorted {
                 iter: bitset.into_ones(),
                 min,
                 _phantom: PhantomData,
@@ -1136,7 +1129,7 @@ macro_rules! impl_tuple_iter {
                 #[inline]
                 fn tuple_iter_mut(&'a mut self) -> Self::TupMut {
                     TupleMut {
-                        arr: [$(&mut self.$n as *mut T,)+],
+                        arr: [$(core::ptr::addr_of_mut!(self.$n),)+],
                         idx_iter: 0..$N,
                         _unused: PhantomData,
                     }
@@ -1173,7 +1166,7 @@ pub mod trait_itern {
 
         /// Creates an iterator from a tuple that returns elements by reference.
         ///
-        /// The difference from the [tuple_iter](crate::TupleIter::tuple_iter) method is that it can get N elements.
+        /// The difference from the [`tuple_iter`](crate::TupleIter::tuple_iter) method is that it can get N elements.
         ///
         /// # Panics
         ///
@@ -1197,7 +1190,7 @@ pub mod trait_itern {
 
         /// Creates an iterator from a tuple that returns elements by mutable reference.
         ///
-        /// The difference from the [tuple_iter_mut](crate::TupleIter::tuple_iter_mut) method is that it can get N elements.
+        /// The difference from the [`tuple_iter_mut`](crate::TupleIter::tuple_iter_mut) method is that it can get N elements.
         ///
         /// # Panics
         ///
@@ -1236,7 +1229,7 @@ pub mod trait_itern {
                     fn tuple_itern_mut<const N: usize>(&'a mut self) -> TupleMut<'a, Self::B, N> {
                         TupleMut {
                             arr: core::array::from_fn(|i| match i {
-                                $($n => &mut self.$n as *mut T,)+
+                                $($n => core::ptr::addr_of_mut!(self.$n),)+
                                 _ => panic!(),
                             }),
                             idx_iter: 0..N,
@@ -1303,7 +1296,7 @@ impl_tuple_into_iter!(10; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T);
 impl_tuple_into_iter!(11; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T);
 impl_tuple_into_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 T);
 
-impl<T: ?Sized> SwapIter<'_> for T where T: Iterator {}
+impl<T: Iterator + ?Sized> SwapIter<'_> for T {}
 
 /// An iterator adapter that swaps elements in two sequences.
 pub trait SwapIter<'a>: Iterator {
