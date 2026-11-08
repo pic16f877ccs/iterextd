@@ -71,6 +71,11 @@ assert_eq!(points, [(0, -1), (1, 0), (0, 1), (-1, 0)]);
 iterextd = "0.9.0"
 ```
 
+## Supported platforms
+
+The crate currently supports 64-bit pointer-width targets only. Its public API is
+unavailable on targets with a different pointer width.
+
 ## License
 
 MIT
