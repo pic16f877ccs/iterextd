@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use iterextd::{CircleBresenhamSeq, IterExtd};
 
 fn bench_create_bresenham_circle(c: &mut Criterion) {

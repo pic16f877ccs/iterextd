@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use iterextd::GenCirclePoints;
 
 fn bench_create_circle_points_f32(c: &mut Criterion) {
@@ -21,5 +21,9 @@ fn bench_create_circle_points_f64(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_create_circle_points_f32,  bench_create_circle_points_f64);
+criterion_group!(
+    benches,
+    bench_create_circle_points_f32,
+    bench_create_circle_points_f64
+);
 criterion_main!(benches);

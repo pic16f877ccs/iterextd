@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use iterextd::Scaler;
 
 fn bench_scaling_value_types_u32_u32_u32(c: &mut Criterion) {

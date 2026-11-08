@@ -1,6 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use itertools::Itertools;
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use iterextd::IterExtd;
+use itertools::Itertools;
 
 fn missing_integer_uqsort(c: &mut Criterion) {
     let mut vec = black_box((0..32).step_by(4).cycle().take(1024).collect_vec());
@@ -43,5 +43,10 @@ fn missing_integer(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches,  missing_integer, missing_integer_uqsort, missing_integer_uqsort_with_new);
+criterion_group!(
+    benches,
+    missing_integer,
+    missing_integer_uqsort,
+    missing_integer_uqsort_with_new
+);
 criterion_main!(benches);
