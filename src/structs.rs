@@ -154,6 +154,41 @@ pub struct ArrChunks<I, const N: usize> {
     pub(crate) iter: I,
 }
 
+struct ArrChunksBuilder<T, const N: usize> {
+    items: [MaybeUninit<T>; N],
+    initialized: usize,
+}
+
+impl<T, const N: usize> ArrChunksBuilder<T, N> {
+    fn new() -> Self {
+        Self {
+            items: unsafe { MaybeUninit::uninit().assume_init() },
+            initialized: 0,
+        }
+    }
+
+    fn push(&mut self, item: T) -> bool {
+        self.items[self.initialized].write(item);
+        self.initialized += 1;
+        self.initialized == N
+    }
+
+    fn into_array(mut self) -> [T; N] {
+        debug_assert_eq!(self.initialized, N);
+        let items = unsafe { ptr::read(self.items.as_ptr().cast::<[T; N]>()) };
+        self.initialized = 0;
+        items
+    }
+}
+
+impl<T, const N: usize> Drop for ArrChunksBuilder<T, N> {
+    fn drop(&mut self) {
+        for item in &mut self.items[..self.initialized] {
+            unsafe { item.assume_init_drop() };
+        }
+    }
+}
+
 impl<I, const N: usize> Iterator for ArrChunks<I, N>
 where
     I: Iterator,
@@ -162,16 +197,13 @@ where
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        let mut arr = unsafe { MaybeUninit::<[MaybeUninit<I::Item>; N]>::uninit().assume_init() };
-        let mut idx = 0;
+        let mut arr = ArrChunksBuilder::new();
 
         loop {
             let elem = self.iter.next()?;
-            arr[idx] = MaybeUninit::new(elem);
-            if idx == N - 1 {
-                break Some(unsafe { arr.map(|e| e.assume_init()) });
+            if arr.push(elem) {
+                break Some(arr.into_array());
             }
-            idx += 1;
         }
     }
 
