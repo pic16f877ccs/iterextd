@@ -1,6 +1,17 @@
 use core::iter;
 use iterextd::IterExtd;
+use std::cell::Cell;
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::rc::Rc;
 use trybuild::TestCases;
+
+struct DropCounter(Rc<Cell<usize>>);
+
+impl Drop for DropCounter {
+    fn drop(&mut self) {
+        self.0.set(self.0.get() + 1);
+    }
+}
 
 #[test]
 fn test_collect_zeroed_arr() {
@@ -179,6 +190,41 @@ fn test_array_chunks() {
         format!("{iter:?}"),
         "ArrChunks { iter: Iter([\"one\"]) }".to_string()
     );
+}
+
+#[test]
+fn test_array_chunks_drops_incomplete_chunk() {
+    let drop_count = Rc::new(Cell::new(0));
+    let item_drop_count = Rc::clone(&drop_count);
+    let mut produced = 0;
+    let source = iter::from_fn(move || {
+        produced += 1;
+        (produced <= 2).then(|| DropCounter(Rc::clone(&item_drop_count)))
+    });
+    let mut chunks = source.arr_chunks::<3>();
+
+    assert!(chunks.next().is_none());
+    assert_eq!(drop_count.get(), 2);
+}
+
+#[test]
+fn test_array_chunks_drops_initialized_items_when_source_panics() {
+    let drop_count = Rc::new(Cell::new(0));
+    let item_drop_count = Rc::clone(&drop_count);
+    let mut calls = 0;
+    let source = iter::from_fn(move || {
+        calls += 1;
+        if calls == 1 {
+            Some(DropCounter(Rc::clone(&item_drop_count)))
+        } else {
+            panic!("source iterator failed");
+        }
+    });
+    let mut chunks = source.arr_chunks::<3>();
+
+    let result = catch_unwind(AssertUnwindSafe(|| chunks.next()));
+    assert!(result.is_err());
+    assert_eq!(drop_count.get(), 1);
 }
 
 #[test]
