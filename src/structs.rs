@@ -1059,7 +1059,7 @@ pub struct TupleImut<'a, T, const N: usize> {
 }
 
 /// Mutable tuple iterator.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TupleMut<'a, T: 'a, const N: usize> {
     pub(crate) arr: [*mut T; N],
     pub(crate) idx_iter: Range<usize>,
