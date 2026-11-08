@@ -133,7 +133,7 @@ where
     <I as Iterator>::Item: SliceIndex<[T], Output = [T]>,
 {
     #[inline]
-    fn new(slice: &'a mut [T], iter: I) -> Self {
+    const fn new(slice: &'a mut [T], iter: I) -> Self {
         Self {
             ptr: slice,
             iter,

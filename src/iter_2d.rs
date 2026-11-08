@@ -89,8 +89,8 @@ pub trait Iter2D: Iterator {
 
         let overlay_right_edge = overlay_offset.0.checked_add(overlay_size.0);
         let overlay_bottom_edge = overlay_offset.1.checked_add(overlay_size.1);
-        if overlay_right_edge.map_or(true, |edge| edge > target_size.0)
-            || overlay_bottom_edge.map_or(true, |edge| edge > target_size.1)
+        if overlay_right_edge.is_none_or(|edge| edge > target_size.0)
+            || overlay_bottom_edge.is_none_or(|edge| edge > target_size.1)
         {
             panic!("the offset and size of the inserted abstract 2D data exceed the bounds");
         }

@@ -597,7 +597,7 @@ fn test_skip_step_size_hint_with_non_exact_input() {
                 let (lower, upper) = actual.size_hint();
                 assert!(lower <= remaining, "skip={skip}, step={step}");
                 assert!(
-                    upper.map_or(true, |upper| remaining <= upper),
+                    upper.is_none_or(|upper| remaining <= upper),
                     "skip={skip}, step={step}"
                 );
                 let next = actual.next();
