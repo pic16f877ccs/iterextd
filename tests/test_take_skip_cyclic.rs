@@ -81,7 +81,7 @@ fn test_take_skip_cyclic_debug() {
     let iter = arr.iter().take_skip_cyclic(3, 2);
     assert_eq!(
         format!("{iter:?}"),
-        "TakeSkipCyclic { iter: Iter([]), take: 3, skip: 2, count: 0 }"
+        "TakeSkipCyclic { iter: Iter([]), take: 3, skip: 2, count: 0, front_index: 0 }"
     );
 }
 
@@ -104,7 +104,50 @@ fn test_take_skip_cyclic() {
 fn test_take_skip_cyclic_rev() {
     let arr = [1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let iter = arr.iter().take_skip_cyclic(3, 2).rev();
-    assert_eq!(iter.collect::<Vec<_>>(), vec![&10, &9, &8, &5, &4, &3]);
+    assert_eq!(iter.collect::<Vec<_>>(), vec![&8, &7, &6, &3, &2, &1]);
+}
+
+#[test]
+fn test_take_skip_cyclic_interleaved_front_and_back() {
+    let arr = [1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut iter = arr.iter().take_skip_cyclic(3, 2);
+
+    assert_eq!(iter.next(), Some(&1));
+    assert_eq!(iter.next_back(), Some(&8));
+    assert_eq!(iter.next_back(), Some(&7));
+    assert_eq!(iter.next(), Some(&2));
+    assert_eq!(iter.next_back(), Some(&6));
+    assert_eq!(iter.next(), Some(&3));
+    assert_eq!(iter.next_back(), None);
+    assert_eq!(iter.next(), None);
+}
+
+#[test]
+fn test_take_skip_cyclic_rev_matches_forward_for_varied_lengths() {
+    for len in 0..=15 {
+        let values = (0..len).collect::<Vec<_>>();
+        for take in 0..=5 {
+            for skip in 0..=4 {
+                let forward = values
+                    .iter()
+                    .take_skip_cyclic(take, skip)
+                    .copied()
+                    .collect::<Vec<_>>();
+                let backward = values
+                    .iter()
+                    .take_skip_cyclic(take, skip)
+                    .rev()
+                    .copied()
+                    .collect::<Vec<_>>();
+
+                assert_eq!(
+                    backward,
+                    forward.iter().rev().copied().collect::<Vec<_>>(),
+                    "len={len}, take={take}, skip={skip}"
+                );
+            }
+        }
+    }
 }
 
 #[test]
