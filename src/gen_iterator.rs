@@ -21,7 +21,7 @@ where
     ///
     /// # Arguments
     ///
-    /// * `radius` - unsigned iteger, radius of the generated circle points.
+    /// * `radius` - unsigned integer, radius of the generated circle points.
     ///
     /// # Examples
     ///

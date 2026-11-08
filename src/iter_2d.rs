@@ -42,7 +42,7 @@ pub trait Iter2D: Iterator {
     /// Returns an `Overlay2D` iterator that yields elements from the base iterator,
     /// with the specified region replaced by elements from `overlay_iter`.
     ///
-    /// # Example
+    /// # Examples
     ///
     /// ```rust
     /// use iterextd::Iter2D;
