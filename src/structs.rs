@@ -978,6 +978,7 @@ pub struct TakeSkipCyclic<I: Iterator> {
     pub(crate) take: usize,
     pub(crate) skip: usize,
     pub(crate) count: usize,
+    pub(crate) front_index: usize,
 }
 
 impl<I> Iterator for TakeSkipCyclic<I>
@@ -989,27 +990,46 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         if self.count == self.take {
             self.count = 1;
-            self.iter.nth(self.skip)
+            let elem = self.iter.nth(self.skip);
+            if elem.is_some() {
+                self.front_index = self.front_index.saturating_add(self.skip.saturating_add(1));
+            }
+            elem
         } else {
             self.count += 1;
-            self.iter.next()
+            let elem = self.iter.next();
+            if elem.is_some() {
+                self.front_index = self.front_index.saturating_add(1);
+            }
+            elem
         }
     }
 }
 
 impl<I> DoubleEndedIterator for TakeSkipCyclic<I>
 where
-    I: DoubleEndedIterator,
+    I: DoubleEndedIterator + ExactSizeIterator + FusedIterator,
 {
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
-        if self.count == self.take {
-            self.count = 1;
-            self.iter.nth_back(self.skip)
-        } else {
-            self.count += 1;
-            self.iter.next_back()
+        while self.iter.len() != 0 {
+            let last_index = self
+                .front_index
+                .checked_add(self.iter.len() - 1)?;
+            let is_selected = if self.take == 0 {
+                false
+            } else if let Some(cycle_len) = self.take.checked_add(self.skip) {
+                last_index % cycle_len < self.take
+            } else {
+                last_index < self.take
+            };
+
+            let elem = self.iter.next_back()?;
+            if is_selected {
+                return Some(elem);
+            }
         }
+        None
     }
 }
 

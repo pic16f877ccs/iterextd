@@ -827,6 +827,9 @@ pub trait IterExtd: Iterator {
     /// let vec = iter.collect::<Vec<_>>();
     /// assert_eq!(vec, vec![1, 2, 3, 6, 7, 8, 11, 12, 13]);
     /// ```
+    ///
+    /// If the source iterator is double-ended, exact-size, and fused, this adapter is
+    /// also double-ended and reverse iteration yields the selected elements in reverse order.
     #[inline]
     fn take_skip_cyclic(self, take: usize, skip: usize) -> TakeSkipCyclic<Self>
     where
@@ -837,6 +840,7 @@ pub trait IterExtd: Iterator {
             take,
             skip: if take == 0 { usize::MAX } else { skip },
             count: 0,
+            front_index: 0,
         }
     }
 
