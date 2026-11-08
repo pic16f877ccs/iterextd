@@ -1,6 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use itertools::Itertools;
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use iterextd::IterExtd;
+use itertools::Itertools;
 
 fn unique_sorted(c: &mut Criterion) {
     let vec = black_box((0..32).cycle().take(1024).collect_vec());
@@ -26,5 +26,5 @@ fn unique_sorted_itertools(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches,   unique_sorted, unique_sorted_itertools);
+criterion_group!(benches, unique_sorted, unique_sorted_itertools);
 criterion_main!(benches);
