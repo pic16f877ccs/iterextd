@@ -1,6 +1,6 @@
 # iterextd
 
-Give Rust iterators a few more useful moves. `iterextd` adds adapters for extending numeric sequences, finding gaps in integer data, and selecting recurring batches.
+Give Rust iterators a few more useful moves. `iterextd` adds adapters for transforming values, extending sequences, finding gaps, and generating points.
 
 ## Examples
 
@@ -40,6 +40,28 @@ use iterextd::IterExtd;
 
 let selected: Vec<_> = (1..=10).take_skip_cyclic(3, 2).collect();
 assert_eq!(selected, [1, 2, 3, 6, 7, 8]);
+```
+
+### Scale values to a range
+
+Map input values onto a new range:
+
+```rust
+use iterextd::Scaler;
+
+let scaled: Vec<_> = (0..=5u8).scaling::<u16>(..70u8).collect();
+assert_eq!(scaled, [0, 14, 28, 42, 56, 70]);
+```
+
+### Generate circle points
+
+Create integer coordinates around a circle with Bresenham's algorithm:
+
+```rust
+use iterextd::CircleBresenhamSeq;
+
+let points: Vec<_> = CircleBresenhamSeq::<i16>::new(1_u8).collect();
+assert_eq!(points, [(0, -1), (1, 0), (0, 1), (-1, 0)]);
 ```
 
 ## Usage
