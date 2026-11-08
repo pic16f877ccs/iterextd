@@ -1,59 +1,54 @@
 # iterextd
 
-Adapters that extend `Iterator` functionality.
+Give Rust iterators a few more useful moves. `iterextd` adds adapters for extending numeric sequences, finding gaps in integer data, and selecting recurring batches.
 
-## Example Usages
+## Examples
 
-### Variable step
+### Extend a numeric sequence
 
-```rust
-use iterextd::IterExtd;
-
-let logic_fn = |s: &mut usize| { if *s == 0 { *s = 1; 1 } else { *s += 1; *s } };
-let iter = (0..18).step_by_fn(logic_fn);
-let vec = iter.collect::<Vec<_>>();
-assert_eq!(vec, vec![0, 2, 5, 9, 14]);
-```
-
-### Collect a zeroed array
+Continue a series using its last observed step:
 
 ```rust
 use iterextd::IterExtd;
 
-let arr = [1u8, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-let iter = arr.iter().filter(|elem| *elem % 2 == 0).copied();
-let arr: (usize, [u8; 10]) = iter.collect_arr_zeroed();
-assert_eq!(arr, (5, [2, 4, 6, 8, 10, 0, 0, 0, 0, 0]));
+let forecast: Vec<_> = [2, 5, 6, 9, 13]
+    .into_iter()
+    .extrapolate()
+    .take(8)
+    .collect();
+assert_eq!(forecast, [2, 5, 6, 9, 13, 17, 21, 25]);
 ```
 
-### Collect windows from arrays.
+### Find missing integers
+
+Find gaps in IDs without sorting or removing duplicates first:
 
 ```rust
 use iterextd::IterExtd;
 
-let arr = [0, 1, 2, 3, 4, 5, 6, 7];
-let iter = arr.into_iter();
-let iter = iter.clone().map_iters(iter.previous(1).skip(2), |self_iter, arg_iter| {
-    let (pre_elem, elem) = arg_iter.next()?;
-    Some([self_iter.next()?, pre_elem, elem])
-});
-let vec = iter.collect::<Vec<_>>();
-assert_eq!(vec, vec![[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5 , 6, 7]]);
+let ids = [8, 3, 5, 3, 6];
+let missing: Vec<_> = ids.iter().missing_integers().collect();
+assert_eq!(missing, [4, 7]);
 ```
 
-## Features
+### Select recurring batches
 
-- `iterextd` provides several adapters to extend the functionality of iterators in Rust.
+Take three items, skip two, and repeat:
+
+```rust
+use iterextd::IterExtd;
+
+let selected: Vec<_> = (1..=10).take_skip_cyclic(3, 2).collect();
+assert_eq!(selected, [1, 2, 3, 6, 7, 8]);
+```
 
 ## Usage
 
-Add this to your `Cargo.toml`:
-
 ```toml
 [dependencies]
-iterextd = "0.8.0"
+iterextd = "0.9.0"
 ```
 
 ## License
 
-This project is licensed under the MIT License.
+MIT
