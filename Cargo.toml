@@ -1,8 +1,8 @@
 [package]
 name = "iterextd"
 version = "0.8.3"
-rust-version = "1.75.0"
-edition = "2021"
+rust-version = "1.85.0"
+edition = "2024"
 authors = ["Karl Wulfert <pic16f877.ccs@emailn.de>"]
 readme = "README.md"
 repository = "https://github.com/pic16f877ccs/iterextd"
