@@ -7,6 +7,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg(target_pointer_width = "64")]
+#![doc = include_str!("../README.md")]
 
 //! Adapters that extend [`Iterator`] functionality.
 //!
@@ -57,24 +58,23 @@
 
 mod gen_iterator;
 mod integer_scaling_iterator;
-#[doc = include_str!("../README.md")]
+mod iter_2d;
 mod iterator;
 mod slice_modify_iter;
 mod structs;
-mod iter_2d;
 
 pub use crate::gen_iterator::CircleBresenhamSeq;
 pub use crate::integer_scaling_iterator::Scaler;
 pub use crate::integer_scaling_iterator::Scaling;
-pub use crate::iterator::IterExtd;
 pub use crate::iter_2d::Iter2D;
+pub use crate::iter_2d::Overlay2D;
+pub use crate::iterator::IterExtd;
 pub use crate::iterator::SwapIter;
 pub use crate::iterator::TupleIntoIter;
 pub use crate::iterator::TupleIter;
 pub use crate::slice_modify_iter::GenRangeBounds;
 pub use crate::slice_modify_iter::SliceModify;
 pub use crate::slice_modify_iter::SliceModifyIter;
-pub use crate::iter_2d::Overlay2D;
 pub use crate::structs::Adapter;
 pub use crate::structs::ArrChunks;
 pub use crate::structs::ArrayCloned;
@@ -114,13 +114,13 @@ use core::array::IntoIter;
 use core::fmt::{self, Debug};
 use core::iter::{Fuse, FusedIterator};
 use core::marker::PhantomData;
-use core::mem::{swap, MaybeUninit};
+use core::mem::{MaybeUninit, swap};
 use core::ops::{Add, AddAssign, Deref, Div, Mul, Range, RangeInclusive, Sub};
 use core::ptr;
 use core::slice::SliceIndex;
 use fixedbitset::{FixedBitSet, IntoOnes};
 use itertools::Itertools;
 use itertools::MinMaxResult::{MinMax, NoElements, OneElement};
-use num::{one, zero, Bounded, CheckedMul, CheckedSub, One, Zero};
+use num::{Bounded, CheckedMul, CheckedSub, One, Zero, one, zero};
 use num_convert::{ToZero, TryFromByAdd};
-use num_integer::{gcd, Integer};
+use num_integer::{Integer, gcd};

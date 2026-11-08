@@ -172,8 +172,7 @@ fn test_scaling_one_elements_bounds() {
     let result = iter.collect::<Vec<i16>>();
     assert_eq!(result, vec![i16::MAX]);
 
-    let iter = std::iter::once(u32::MAX as usize)
-        .scaling::<usize>(0..=u32::MAX as usize + 2);
+    let iter = std::iter::once(u32::MAX as usize).scaling::<usize>(0..=u32::MAX as usize + 2);
     let result = iter.collect::<Vec<_>>();
     assert_eq!(result, vec![u32::MAX as usize + 2]);
 }

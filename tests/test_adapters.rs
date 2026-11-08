@@ -1,7 +1,7 @@
 use core::iter;
 use iterextd::IterExtd;
 use std::cell::Cell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::rc::Rc;
 use trybuild::TestCases;
 
@@ -119,8 +119,9 @@ fn test_collect_zeroed_arr_zero_capacity_does_not_poll() {
         Some(1u8)
     });
 
-    let result =
-        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| source.collect_arr_zeroed::<0>()));
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        source.collect_arr_zeroed::<0>()
+    }));
     assert!(result.is_err());
     assert_eq!(calls.get(), 0);
 }
@@ -617,7 +618,11 @@ fn test_skip_step_size_hint_and_len_after_advancing() {
                         (remaining, Some(remaining)),
                         "len={len}, skip={skip}, step={step}"
                     );
-                    assert_eq!(actual.len(), remaining, "len={len}, skip={skip}, step={step}");
+                    assert_eq!(
+                        actual.len(),
+                        remaining,
+                        "len={len}, skip={skip}, step={step}"
+                    );
                     let next = actual.next();
                     assert_eq!(next, expected.next(), "len={len}, skip={skip}, step={step}");
                     if next.is_none() {
@@ -1279,7 +1284,6 @@ fn test_to_tuple_icv() {
     assert_eq!(vec, vec![(0, 2), (3, 5), (6, 8),]);
 }
 
-
 #[test]
 fn test_offset_offset_clone() {
     let arr_tup = [(0, 2), (3, 5), (6, 8)];
@@ -1298,6 +1302,8 @@ fn test_offset_empty_debug() {
     assert_eq!(vec, vec![]);
     let arr_tup = [(10, 20)];
     let iter = arr_tup.into_iter().offset(10, 10);
-    assert_eq!(format!("{iter:?}"),
-    "Offset { iter: IntoIter([(10, 20)]), offset_x: 10, offset_y: 10 }");
+    assert_eq!(
+        format!("{iter:?}"),
+        "Offset { iter: IntoIter([(10, 20)]), offset_x: 10, offset_y: 10 }"
+    );
 }

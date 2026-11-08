@@ -1,10 +1,3 @@
-use crate::structs::{
-    Adapter, ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy,
-    LastTaken, MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup,
-    RangeToTup, SkipStepBy, SliceCopied, StepBoundary, StepByFn, TakeSkipCyclic, TupToRange,
-    TupToRangeIcv, TupleImut, TupleMut, UniqueSorted,
-};
-use crate::swap;
 use crate::Debug;
 use crate::FixedBitSet;
 use crate::FusedIterator;
@@ -14,8 +7,15 @@ use crate::MaybeUninit;
 use crate::MinMax;
 use crate::PhantomData;
 use crate::Zero;
-use crate::{gcd, Integer};
+use crate::structs::{
+    Adapter, ArrChunks, ArrayCloned, ArrayCopied, CombineIters, Extrapolate, InclusiveStepBy,
+    LastTaken, MapByThree, MapByTwo, MapIters, MissingIntegers, Offset, Previous, RangeIcvToTup,
+    RangeToTup, SkipStepBy, SliceCopied, StepBoundary, StepByFn, TakeSkipCyclic, TupToRange,
+    TupToRangeIcv, TupleImut, TupleMut, UniqueSorted,
+};
+use crate::swap;
 use crate::{Deref, Range};
+use crate::{Integer, gcd};
 use crate::{ToZero, TryFromByAdd};
 
 #[cfg(feature = "std")]
@@ -575,7 +575,7 @@ pub trait IterExtd: Iterator {
     fn missing_integers_uqsort(
         self,
     ) -> impl Iterator<Item = <Range<<<Self as Iterator>::Item as Deref>::Target> as Iterator>::Item>
-           + Debug
+    + Debug
     where
         Self: Sized + Clone + Debug,
         <Self as Iterator>::Item: PartialOrd + Deref + Debug,
@@ -1158,8 +1158,8 @@ impl_tuple_iter!(12; 0 T, 1 T, 2 T, 3 T, 4 T, 5 T, 6 T, 7 T, 8 T, 9 T, 10 T, 11 
 #[cfg(feature = "itern")]
 #[cfg_attr(docsrs, doc(cfg(feature = "itern")))]
 pub mod trait_itern {
-    use crate::structs::{TupleImut, TupleMut};
     use crate::PhantomData;
+    use crate::structs::{TupleImut, TupleMut};
 
     /// A trait that allows iteration over N elements of a tuple.
     pub trait TupleItern<'a> {

@@ -3,9 +3,9 @@ use iterextd::IterExtd;
 #[test]
 fn test_adapter() {
     let arr: [u8; 3] = [40, 50, 60];
-    let iter = arr
-        .iter()
-        .adapter([10, 20, 30].iter(), |iter, i| i.next().or_else(|| iter.next()));
+    let iter = arr.iter().adapter([10, 20, 30].iter(), |iter, i| {
+        i.next().or_else(|| iter.next())
+    });
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(vec, vec![&10, &20, &30, &40, &50, &60]);
 }
@@ -46,15 +46,14 @@ fn test_adapter_mut() {
         iter.collect::<Vec<_>>(),
         vec![[&mut 10, &mut 13], [&mut 11, &mut 14]]
     );
-
 }
 
 #[test]
 fn test_adapter_clone() {
     let arr: [u8; 3] = [4, 5, 6];
-    let iter = arr
-        .into_iter()
-        .adapter([1, 2, 3].iter(), |iter, i| i.next().copied().or_else(|| iter.next()));
+    let iter = arr.into_iter().adapter([1, 2, 3].iter(), |iter, i| {
+        i.next().copied().or_else(|| iter.next())
+    });
     let vec_cloned = iter.clone().collect::<Vec<_>>();
     let vec = iter.collect::<Vec<_>>();
     assert_eq!(vec, vec_cloned);

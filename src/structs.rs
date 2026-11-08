@@ -1,13 +1,13 @@
-use crate::fmt;
-use crate::ptr;
 use crate::MaybeUninit;
 use crate::PhantomData;
 use crate::TryFromByAdd;
+use crate::fmt;
+use crate::ptr;
 use crate::{Add, AddAssign, Deref, Sub};
 use crate::{FixedBitSet, IntoOnes};
 use crate::{Fuse, FusedIterator};
 use crate::{Range, RangeInclusive};
-use num::{traits::FloatConst, Float, NumCast};
+use num::{Float, NumCast, traits::FloatConst};
 
 /// Universal adapter for iterators.
 #[derive(Clone)]
@@ -407,11 +407,7 @@ where
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (lower, upper) = self.iter.size_hint();
         let div = |x: usize| {
-            if x == 0 {
-                0
-            } else {
-                1 + (x - 1) / self.size
-            }
+            if x == 0 { 0 } else { 1 + (x - 1) / self.size }
         };
 
         (div(lower), upper.map(div))
@@ -862,11 +858,11 @@ impl<I, T> ExactSizeIterator for RangeIcvToTup<I> where
 
 /// Iterator adapter with skip and step capabilities in one.
 #[derive(Debug, Clone)]
-    pub struct SkipStepBy<I> {
-        pub(crate) iter: Fuse<I>,
-        pub(crate) skip: usize,
-        pub(crate) step: usize,
-    }
+pub struct SkipStepBy<I> {
+    pub(crate) iter: Fuse<I>,
+    pub(crate) skip: usize,
+    pub(crate) step: usize,
+}
 
 impl<I> Iterator for SkipStepBy<I>
 where
@@ -1013,9 +1009,7 @@ where
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         while self.iter.len() != 0 {
-            let last_index = self
-                .front_index
-                .checked_add(self.iter.len() - 1)?;
+            let last_index = self.front_index.checked_add(self.iter.len() - 1)?;
             let is_selected = if self.take == 0 {
                 false
             } else if let Some(cycle_len) = self.take.checked_add(self.skip) {

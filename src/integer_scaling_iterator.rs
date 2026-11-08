@@ -2,8 +2,8 @@ use crate::FusedIterator;
 use crate::Itertools;
 use crate::PhantomData;
 use crate::TryFromByAdd;
-use crate::{one, zero, Bounded, CheckedMul, CheckedSub, One, Zero};
 use crate::{Add, Div, Mul, Sub};
+use crate::{Bounded, CheckedMul, CheckedSub, One, Zero, one, zero};
 use crate::{MinMax, NoElements, OneElement};
 
 /// Structure that stores data, parameters for the [`scaling`](Scaler::scaling) iterator adapter.

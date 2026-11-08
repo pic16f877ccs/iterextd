@@ -656,7 +656,7 @@ fn test_tuple_itern_elems() {
     let tup = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
     let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     let iter = arr.iter();
-    let vec1 =  iter.clone().take(1).collect::<Vec<_>>();
+    let vec1 = iter.clone().take(1).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern::<1>().collect::<Vec<_>>(), vec1);
     let vec2 = iter.clone().take(2).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern::<2>().collect::<Vec<_>>(), vec2);
@@ -687,7 +687,7 @@ fn test_tuple_mut_itern_elems() {
     let mut tup = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
     let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     let iter = arr.iter();
-    let vec1 =  iter.clone().take(1).collect::<Vec<_>>();
+    let vec1 = iter.clone().take(1).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern_mut::<1>().collect::<Vec<&mut i32>>(), vec1);
     let vec2 = iter.clone().take(2).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern_mut::<2>().collect::<Vec<&mut i32>>(), vec2);
@@ -706,9 +706,15 @@ fn test_tuple_mut_itern_elems() {
     let vec9 = iter.clone().take(9).collect::<Vec<_>>();
     assert_eq!(tup.tuple_itern_mut::<9>().collect::<Vec<&mut i32>>(), vec9);
     let vec10 = iter.clone().take(10).collect::<Vec<_>>();
-    assert_eq!(tup.tuple_itern_mut::<10>().collect::<Vec<&mut i32>>(), vec10);
+    assert_eq!(
+        tup.tuple_itern_mut::<10>().collect::<Vec<&mut i32>>(),
+        vec10
+    );
     let vec11 = iter.clone().take(11).collect::<Vec<_>>();
-    assert_eq!(tup.tuple_itern_mut::<11>().collect::<Vec<&mut i32>>(), vec11);
+    assert_eq!(
+        tup.tuple_itern_mut::<11>().collect::<Vec<&mut i32>>(),
+        vec11
+    );
     let vec_twelve = iter.clone().take(12).collect::<Vec<_>>();
     assert_eq!(
         tup.tuple_itern_mut::<12>().collect::<Vec<&mut i32>>(),

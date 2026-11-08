@@ -23,6 +23,9 @@ mod tests {
         assert_eq!(extrapolated, extrapolated_clone);
         let arr: [u8; 4] = [2, 4, 6, 8];
         let iter = arr.into_iter().extrapolate();
-        assert_eq!(format!("{iter:?}"), "Extrapolate { iter: IntoIter([2, 4, 6, 8]), arg_one: 0, arg_two: 0 }");
+        assert_eq!(
+            format!("{iter:?}"),
+            "Extrapolate { iter: IntoIter([2, 4, 6, 8]), arg_one: 0, arg_two: 0 }"
+        );
     }
 }

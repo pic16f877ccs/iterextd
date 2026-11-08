@@ -1,6 +1,6 @@
-use crate::{SliceIndex, IterExtd, StepBoundary};
-use crate::{Range, RangeInclusive};
 use crate::PhantomData;
+use crate::{IterExtd, SliceIndex, StepBoundary};
+use crate::{Range, RangeInclusive};
 
 impl<T> SliceModifyIter<T> for [T] {}
 

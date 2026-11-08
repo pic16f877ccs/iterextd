@@ -76,7 +76,9 @@ fn test_slice_modify_iter() {
     let () = arr.modify_slice(iter, logic);
     assert_eq!(
         arr,
-        ["with", "Slice", "modifier", "iterator", "An", ".", "index", "bounds", "external"]
+        [
+            "with", "Slice", "modifier", "iterator", "An", ".", "index", "bounds", "external"
+        ]
     );
 
     let mut arr = [

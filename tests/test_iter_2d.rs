@@ -256,21 +256,14 @@ fn test_overlay_2d_overlay_fits_exactly_at_bottom_right() {
     // Overlay is inserted in the bottom right corner of base
     let base = vec![0; 16];
     let overlay = vec![1, 2, 3, 4];
-    let result: Vec<_> = base.into_iter().overlay_2d(
-        overlay.into_iter(),
-        (4, 4),
-        (2, 2),
-        (2, 2),
-    ).collect();
+    let result: Vec<_> = base
+        .into_iter()
+        .overlay_2d(overlay.into_iter(), (4, 4), (2, 2), (2, 2))
+        .collect();
     // Overlay must replace the last 2 rows, last 2 colunns
     assert_eq!(
         result,
-        vec![
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 1, 2,
-            0, 0, 3, 4,
-        ]
+        vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4,]
     );
 }
 
@@ -279,20 +272,11 @@ fn test_overlay_2d_overlay_single_cell() {
     // Overlay size 1x1 in center of base
     let base = vec![0; 9];
     let overlay = vec![9];
-    let result: Vec<_> = base.into_iter().overlay_2d(
-        overlay.into_iter(),
-        (3, 3),
-        (1, 1),
-        (1, 1),
-    ).collect();
-    assert_eq!(
-        result,
-        vec![
-            0, 0, 0,
-            0, 9, 0,
-            0, 0, 0,
-        ]
-    );
+    let result: Vec<_> = base
+        .into_iter()
+        .overlay_2d(overlay.into_iter(), (3, 3), (1, 1), (1, 1))
+        .collect();
+    assert_eq!(result, vec![0, 0, 0, 0, 9, 0, 0, 0, 0,]);
 }
 
 #[test]
@@ -300,20 +284,11 @@ fn test_overlay_2d_overlay_full_row() {
     // Overlay size 3x1 (one line)
     let base = vec![0; 9];
     let overlay = vec![1, 2, 3];
-    let result: Vec<_> = base.into_iter().overlay_2d(
-        overlay.into_iter(),
-        (3, 3),
-        (3, 1),
-        (0, 1),
-    ).collect();
-    assert_eq!(
-        result,
-        vec![
-            0, 0, 0,
-            1, 2, 3,
-            0, 0, 0,
-        ]
-    );
+    let result: Vec<_> = base
+        .into_iter()
+        .overlay_2d(overlay.into_iter(), (3, 3), (3, 1), (0, 1))
+        .collect();
+    assert_eq!(result, vec![0, 0, 0, 1, 2, 3, 0, 0, 0,]);
 }
 
 #[test]
@@ -321,26 +296,19 @@ fn test_overlay_2d_overlay_full_column() {
     // Overlay size 1x3 (one row)
     let base = vec![0; 9];
     let overlay = vec![1, 2, 3];
-    let result: Vec<_> = base.into_iter().overlay_2d(
-        overlay.into_iter(),
-        (3, 3),
-        (1, 3),
-        (1, 0),
-    ).collect();
-    assert_eq!(
-        result,
-        vec![
-            0, 1, 0,
-            0, 2, 0,
-            0, 3, 0,
-        ]
-    );
+    let result: Vec<_> = base
+        .into_iter()
+        .overlay_2d(overlay.into_iter(), (3, 3), (1, 3), (1, 0))
+        .collect();
+    assert_eq!(result, vec![0, 1, 0, 0, 2, 0, 0, 3, 0,]);
 }
 
 #[test]
 fn test_overlay_2d_overlay_len_size_hint() {
     // Overlay len 90 elements
-    let iter = (1..101).take(90).overlay_2d(1..65, (10, 10), (8, 8), (1, 1));
+    let iter = (1..101)
+        .take(90)
+        .overlay_2d(1..65, (10, 10), (8, 8), (1, 1));
     assert_eq!(iter.size_hint().0, 90);
     assert_eq!(iter.size_hint().1, Some(90));
     assert_eq!(iter.len(), 90);
@@ -353,6 +321,6 @@ fn test_overlay_2d_debug() {
 
     let debug_str = "Overlay2D { base_iter: 1..=100, overlay_iter: 1..=64, \
         base_index: 0, overlay_index: 11, overlay_row_width: 8, \
-        overlay_row_padding: 2, in_overlay_row: false }";  
+        overlay_row_padding: 2, in_overlay_row: false }";
     assert_eq!(format!("{iter:?}"), debug_str);
 }
